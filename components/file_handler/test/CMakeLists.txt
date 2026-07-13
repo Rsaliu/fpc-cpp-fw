@@ -4,7 +4,7 @@ idf_component_register(
     SRC_DIRS "."
     INCLUDE_DIRS "."
     REQUIRES unity
-    PRIV_REQUIRES file_handler common
+    PRIV_REQUIRES file_handler common spiffs
 )
 
 set_target_properties(${COMPONENT_LIB} PROPERTIES
