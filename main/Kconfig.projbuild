@@ -1,0 +1,64 @@
+menu "FPC MQTTS Configuration"
+
+    config FPC_MQTTS_BROKER_URL
+        string "MQTTS broker URL"
+        default "mqtts://192.168.100.3"
+        help
+            URL of the MQTTS broker the device connects to (e.g. mqtts://host).
+
+    config FPC_MQTTS_BROKER_PORT
+        int "MQTTS broker port"
+        default 8883
+        help
+            TCP port of the MQTTS broker.
+
+    config FPC_MQTTS_OTA_SUBSCRIBE_TOPIC_JOB
+        string "Subscribe topic: OTA job"
+        default "/device/ota/{device_id}/firmware_update"
+        help
+            Topic subscribed to for firmware-update job messages.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+    config FPC_MQTTS_OTA_SUBSCRIBE_TOPIC_ROLLBACK
+        string "Subscribe topic: OTA rollback"
+        default "/device/ota/{device_id}/firmware_rollback"
+        help
+            Topic subscribed to for firmware-rollback messages.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+    config FPC_MQTTS_OTA_PUBLISH_TOPIC_CHECKIN
+        string "Publish topic: OTA check-in"
+        default "/device/ota/{device_id}/checkin"
+        help
+            Topic published to for device check-in messages.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+    config FPC_MQTTS_OTA_PUBLISH_TOPIC_ACK
+        string "Publish topic: OTA ack"
+        default "/device/ota/{device_id}/ack"
+        help
+            Topic published to for firmware-update acknowledgements.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+    config FPC_MQTTS_OTA_PUBLISH_TOPIC_PROGRESS
+        string "Publish topic: OTA progress"
+        default "/device/ota/{device_id}/progress"
+        help
+            Topic published to for firmware-update progress updates.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+    config FPC_MQTTS_OTA_PUBLISH_TOPIC_RESULT
+        string "Publish topic: OTA result"
+        default "/device/ota/{device_id}/result"
+        help
+            Topic published to for firmware-update results.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+    config FPC_MQTTS_OTA_PUBLISH_TOPIC_ERROR
+        string "Publish topic: OTA error"
+        default "/device/ota/{device_id}/error"
+        help
+            Topic published to for firmware-update errors.
+            "{device_id}" is replaced at runtime with the device MAC.
+
+endmenu

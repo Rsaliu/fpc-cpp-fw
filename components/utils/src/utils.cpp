@@ -30,6 +30,24 @@ Result<std::string> swap_string(std::string_view input,
     return Result<std::string>::ok(std::move(src));
 }
 
+Result<std::string> swap_string_all(std::string_view input,
+                                    std::string_view to_swap,
+                                    std::string_view replacement)
+{
+    if (to_swap.empty()) {
+        ESP_LOGE(TAG, "swap_string_all: to_swap is empty");
+        return Result<std::string>::err(SystemError::InvalidParameter);
+    }
+
+    std::string src{input};
+    std::size_t pos = 0;
+    while ((pos = src.find(to_swap, pos)) != std::string::npos) {
+        src.replace(pos, to_swap.size(), replacement);
+        pos += replacement.size();  // skip past the replacement to avoid re-matching
+    }
+    return Result<std::string>::ok(std::move(src));
+}
+
 Result<void> is_valid_json(std::string_view json_str)
 {
     if (json_str.empty()) {
@@ -93,6 +111,50 @@ Result<std::string> get_nvs_blob(nvs_handle_t handle,
     buf.resize(read_size);
     ESP_LOGI(TAG, "Blob '%s' read — %zu bytes", key_name, read_size);
     return Result<std::string>::ok(std::move(buf));
+}
+
+Result<std::string> read_nvs_blob_from_partition(const char* partition_label,
+                                                 const char* namespace_name,
+                                                 const char* key_name)
+{
+    if (partition_label == nullptr || namespace_name == nullptr || key_name == nullptr) {
+        ESP_LOGE(TAG, "read_nvs_blob_from_partition: null parameter");
+        return Result<std::string>::err(SystemError::NullParameter);
+    }
+
+    // Register the partition if it hasn't been already (safe to call repeatedly).
+    esp_err_t ret = nvs_flash_init_partition(partition_label);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "nvs_flash_init_partition('%s') failed: %s",
+                 partition_label, esp_err_to_name(ret));
+        return Result<std::string>::err(SystemError::Failed);
+    }
+
+    nvs_handle_t handle{};
+    ret = nvs_open_from_partition(partition_label, namespace_name,
+                                  NVS_READONLY, &handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "nvs_open_from_partition('%s','%s') failed: %s",
+                 partition_label, namespace_name, esp_err_to_name(ret));
+        return Result<std::string>::err(SystemError::Failed);
+    }
+
+    auto size = get_nvs_blob_size(handle, key_name);
+    if (size.is_err()) {
+        nvs_close(handle);
+        return Result<std::string>::err(size.error());
+    }
+    if (size.value() == 0) {
+        ESP_LOGE(TAG, "Blob '%s' missing/empty in '%s/%s'",
+                 key_name, partition_label, namespace_name);
+        nvs_close(handle);
+        return Result<std::string>::err(SystemError::Failed);
+    }
+
+    // +1 leaves room for a NUL terminator behind the blob bytes.
+    auto blob = get_nvs_blob(handle, key_name, size.value() + 1);
+    nvs_close(handle);
+    return blob;
 }
 
 } // namespace utils
