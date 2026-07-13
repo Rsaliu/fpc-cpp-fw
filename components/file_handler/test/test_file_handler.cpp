@@ -3,7 +3,41 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <cstdio>
+#include "esp_err.h"
+#include "esp_spiffs.h"
+#include "esp_log.h"
 
+static const char* TAG = "SPIFFS_INIT";
+
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true
+    };
+
+    void  initialize_spiffs() {
+     // Register and mount the VFS SPIFFS file system
+    esp_err_t reg = esp_vfs_spiffs_register(&conf);
+   
+    if (reg != ESP_OK) {
+        if (reg == ESP_FAIL) {
+            ESP_LOGE(TAG, "Failed to mount or format filesystem");
+        } else if (reg == ESP_ERR_NOT_FOUND) {
+            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+        } else {
+            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(reg));
+        }
+        return;
+    }
+
+    // Verify SPIFFS mounting and query space info
+    size_t total = 0, used = 0;
+    reg = esp_spiffs_info(conf.partition_label, &total, &used);
+    if (reg == ESP_OK) {
+        ESP_LOGI(TAG, "Partition size: total: %d bytes, used: %d bytes", total, used);
+    }
+    }
 static fpc::FileHandlerConfig make_no_op_config()
 {
     fpc::FileHandlerConfig cfg;
@@ -90,11 +124,12 @@ TEST_CASE("FileHandler: get_size empty path returns InvalidParameter", "[file_ha
 
 TEST_CASE("FileHandler: write then read back via POSIX VFS", "[file_handler]")
 {
+    initialize_spiffs();
     fpc::FileHandler fh{make_no_op_config()};
     TEST_ASSERT_TRUE(fh.init().is_ok());
 
     char path[64];
-    std::snprintf(path, sizeof(path), "/tmp/fh_test_%u.txt",
+    std::snprintf(path, sizeof(path), "/spiffs/fh_test_%u.txt",
                   (unsigned)xTaskGetTickCount());
 
     const std::string content = "hello from FileHandler";
