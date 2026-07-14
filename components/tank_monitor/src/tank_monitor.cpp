@@ -1,8 +1,10 @@
 #include "tank_monitor.hpp"
 #include <cstdio>
 #include "esp_log.h"
+#include <freertos/FreeRTOS.h>
 
 static const char* TAG = "tank_monitor";
+constexpr int kDefaultReadDelayMs = 500;  // Delay between samples in milliseconds
 
 namespace fpc {
 
@@ -62,6 +64,7 @@ Result<void> TankMonitor::check_level()
             return Result<void>::err(res.error());
         }
         samples_[i] = res.value();
+        vTaskDelay(pdMS_TO_TICKS(kDefaultReadDelayMs));  // Small delay between samples to avoid hammering the sensor
     }
 
     const int32_t full_mm = config_.tank_config.full_level_mm;
