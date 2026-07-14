@@ -35,6 +35,7 @@ set(EXTRA_COMPONENT_DIRS
     "../components/ota_handler"
     "../components/comms_manager"
     "../components/setup_config_button"
+    "../components/nlohmann_json"
     "../third_party/esp-protocols/components/mdns"
 )
 
