@@ -29,15 +29,6 @@ static void print_banner(const char* text)
 
 extern "C" void app_main(void)
 {
-  esp_vfs_spiffs_conf_t conf = {
-        .base_path = "/spiffs",
-        .partition_label = NULL,
-        .max_files = 5,
-        .format_if_mount_failed = true
-    };
-    
-    ESP_ERROR_CHECK(esp_vfs_spiffs_register(&conf));
-
     print_banner("fpc-cpp: Running all registered Unity tests");
     ESP_LOGI(TAG, "Starting test suite...");
 

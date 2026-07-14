@@ -6,42 +6,77 @@
 #include "esp_err.h"
 #include "esp_spiffs.h"
 #include "esp_log.h"
+#include "common.hpp"
 
-static const char* TAG = "SPIFFS_INIT";
+static const char *TAG = "FILE_HANDLER_TEST";
+esp_vfs_spiffs_conf_t conf = {
+    .base_path = "/spiffs",
+    .partition_label = NULL,
+    .max_files = 5,
+    .format_if_mount_failed = true};
 
-    esp_vfs_spiffs_conf_t conf = {
-        .base_path = "/spiffs",
-        .partition_label = NULL,
-        .max_files = 5,
-        .format_if_mount_failed = true
-    };
-
-    void  initialize_spiffs() {
-     // Register and mount the VFS SPIFFS file system
+fpc::Result<void> initialize_spiffs()
+{
+    // Register and mount the VFS SPIFFS file system
     esp_err_t reg = esp_vfs_spiffs_register(&conf);
-   
-    if (reg != ESP_OK) {
-        if (reg == ESP_FAIL) {
+
+    if (reg != ESP_OK)
+    {
+        if (reg == ESP_FAIL)
+        {
             ESP_LOGE(TAG, "Failed to mount or format filesystem");
-        } else if (reg == ESP_ERR_NOT_FOUND) {
-            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
-        } else {
-            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(reg));
+            return fpc::Result<void>::err(fpc::SystemError::OperationFailed);
         }
-        return;
+        else if (reg == ESP_ERR_NOT_FOUND)
+        {
+            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+            return fpc::Result<void>::err(fpc::SystemError::OutOfRange);
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(reg));
+            return fpc::Result<void>::err(fpc::SystemError::OperationFailed);
+        }
     }
 
     // Verify SPIFFS mounting and query space info
     size_t total = 0, used = 0;
     reg = esp_spiffs_info(conf.partition_label, &total, &used);
-    if (reg == ESP_OK) {
-        ESP_LOGI(TAG, "Partition size: total: %d bytes, used: %d bytes", total, used);
+    if (reg != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to get partition info");
+        return fpc::Result<void>::err(fpc::SystemError::OperationFailed);
     }
+    ESP_LOGI(TAG, "Partition size: total: %d bytes, used: %d bytes", total, used);
+    return fpc::Result<void>::ok();
+}
+
+fpc::Result<void> deinitialize_spiffs()
+{
+    // unmount partition and disable SPIFFS
+   esp_err_t unreg = esp_vfs_spiffs_unregister(conf.partition_label);
+    ESP_LOGI(TAG, "SPIFFS unmounted");
+
+    if (unreg == ESP_OK)
+    {
+            ESP_LOGE(TAG, "Failed to Unmount or format filesystem");
+            return fpc::Result<void>::err(fpc::SystemError::OperationFailed);
     }
+    return fpc::Result<void>::ok();
+}
+
+static fpc::FileHandlerConfig make_spiffs_config()
+{
+    fpc::FileHandlerConfig cfg;
+    cfg.init_fn = []() { return initialize_spiffs(); };
+    cfg.deinit_fn = []() { return deinitialize_spiffs(); };
+    return cfg;
+}
+
 static fpc::FileHandlerConfig make_no_op_config()
 {
     fpc::FileHandlerConfig cfg;
-    cfg.init_fn   = []() { return fpc::Result<void>::ok(); };
+    cfg.init_fn = []() { return fpc::Result<void>::ok(); };
     cfg.deinit_fn = []() { return fpc::Result<void>::ok(); };
     return cfg;
 }
@@ -71,7 +106,8 @@ TEST_CASE("FileHandler: init without callback still succeeds", "[file_handler]")
 TEST_CASE("FileHandler: failing init_fn propagates error", "[file_handler]")
 {
     fpc::FileHandlerConfig cfg;
-    cfg.init_fn = []() { return fpc::Result<void>::err(fpc::SystemError::Failed); };
+    cfg.init_fn = []()
+    { return fpc::Result<void>::err(fpc::SystemError::Failed); };
     fpc::FileHandler fh{cfg};
     TEST_ASSERT_TRUE(fh.init().is_err());
     TEST_ASSERT_FALSE(fh.is_initialized());
@@ -124,8 +160,7 @@ TEST_CASE("FileHandler: get_size empty path returns InvalidParameter", "[file_ha
 
 TEST_CASE("FileHandler: write then read back via POSIX VFS", "[file_handler]")
 {
-    initialize_spiffs();
-    fpc::FileHandler fh{make_no_op_config()};
+    fpc::FileHandler fh{make_spiffs_config()};
     TEST_ASSERT_TRUE(fh.init().is_ok());
 
     char path[64];
