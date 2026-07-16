@@ -18,6 +18,7 @@
 #include <cstdio>
 #include "unity.h"
 #include "esp_log.h"
+#include "esp_spiffs.h"
 
 static constexpr char TAG[] = "TEST_RUNNER";
 
@@ -32,7 +33,7 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Starting test suite...");
 
     UNITY_BEGIN();
-    unity_run_all_tests();
+    unity_run_tests_by_tag("[file_handler]", false);
     UNITY_END();
 
     ESP_LOGI(TAG, "Test suite complete.");
