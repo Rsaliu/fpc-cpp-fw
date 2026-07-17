@@ -4,7 +4,7 @@ idf_component_register(
     SRC_DIRS "."
     INCLUDE_DIRS "."
     REQUIRES unity
-    PRIV_REQUIRES webserver common
+    PRIV_REQUIRES webserver common esp_http_server
 )
 
 set_target_properties(${COMPONENT_LIB} PROPERTIES
