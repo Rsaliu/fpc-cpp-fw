@@ -1,5 +1,7 @@
 #include "unity.h"
 #include "webserver.hpp"
+#include "esp_netif.h"
+#include "esp_event.h"
 
 static fpc::WebserverConfig make_config()
 {
@@ -67,6 +69,10 @@ TEST_CASE("Webserver: add_route when not running returns InvalidState", "[webser
 
 TEST_CASE("Webserver: full lifecycle init start stop deinit", "[webserver]")
 {
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    
     fpc::Webserver ws{make_config()};
     TEST_ASSERT_TRUE(ws.init().is_ok());
     TEST_ASSERT_TRUE(ws.start().is_ok());
