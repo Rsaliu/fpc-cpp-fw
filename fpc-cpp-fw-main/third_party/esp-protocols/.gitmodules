@@ -1,0 +1,9 @@
+[submodule "components/asio/asio"]
+	path = components/asio/asio
+	url = https://github.com/chriskohlhoff/asio
+[submodule "components/mosquitto/mosquitto"]
+	path = components/mosquitto/mosquitto
+	url = https://github.com/eclipse/mosquitto
+[submodule "components/libwebsockets/libwebsockets"]
+	path = components/libwebsockets/libwebsockets
+	url = https://github.com/warmcat/libwebsockets.git

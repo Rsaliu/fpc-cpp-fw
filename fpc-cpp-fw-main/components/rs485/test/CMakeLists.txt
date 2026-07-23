@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.16)
+
+idf_component_register(
+    SRC_DIRS "."
+    INCLUDE_DIRS "."
+    REQUIRES unity
+    PRIV_REQUIRES rs485 common esp_driver_uart esp_driver_gpio
+)
+
+set_target_properties(${COMPONENT_LIB} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS ON
+)

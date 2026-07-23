@@ -1,0 +1,20 @@
+CONFIG_IDF_TARGET="esp32s3"
+
+# Disable watchdogs — they fire during unit tests running on-device.
+CONFIG_ESP_INT_WDT=n
+CONFIG_ESP_TASK_WDT=n
+
+# Flash
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+
+# Enable C++ exceptions and RTTI — required for C++17 components.
+CONFIG_COMPILER_CXX_EXCEPTIONS=y
+CONFIG_COMPILER_CXX_RTTI=y
+
+# Run-time heap / stack checks.
+CONFIG_HEAP_POISONING_COMPREHENSIVE=y
+CONFIG_COMPILER_STACK_CHECK_MODE_STRONG=y
+CONFIG_COMPILER_STACK_CHECK=y
+
+# Large stack so test framework and test cases don't overflow.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16000
