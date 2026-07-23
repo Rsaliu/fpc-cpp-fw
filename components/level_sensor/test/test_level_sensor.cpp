@@ -273,3 +273,15 @@ TEST_CASE("ILevelSensor pointer works with LevelSensor read()", "[level_sensor]"
     TEST_ASSERT_TRUE(r.is_ok());
     TEST_ASSERT_EQUAL_UINT16(754u, r.value());
 }
+
+TEST_CASE("LevelSensor: read return repsonr on the blindspot", "[level_sensor]")
+{
+    auto cfg = make_valid_config(make_failing_transport());
+    cfg.blindspot_mm = nullptr;
+    LevelSensor sensor{std::move(cfg)};
+    sensor.init();
+    auto r = sensor.read();
+    TEST_ASSERT_TRUE(r.is_err());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SystemError::InvalidLength),
+                          static_cast<int>(r.error()));
+}
