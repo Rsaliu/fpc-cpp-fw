@@ -224,7 +224,7 @@ If the file is missing, the firmware falls back to a hardcoded example (defined 
       "id": 1,
       "tanks": [
         { "id": 1, "capacity_litres": 1000.0, "shape": "RECTANGULAR",
-          "height_cm": 200.0, "full_level_mm": 1800, "low_level_mm": 200 }
+          "height_mm": 200.0 * 10 , "full_level_mm": 1800, "low_level_mm": 200 }
       ],
       "pumps": [
         { "id": 1, "make": "TestPump", "power_in_hp": 2.5,

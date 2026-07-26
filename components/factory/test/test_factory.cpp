@@ -19,7 +19,7 @@ static PumpSetupConfig make_pump(int32_t id = 1) {
 static TankSetupConfig make_tank(int32_t id = 1) {
     return TankSetupConfig{
         .id = id, .capacity_litres = 1000.0f, .shape = "RECTANGULAR",
-        .height_cm = 200.0f, .full_level_mm = 1800, .low_level_mm = 200,
+        .height_mm = 200.0f * 10, .full_level_mm = 1800, .low_level_mm = 200,
     };
 }
 

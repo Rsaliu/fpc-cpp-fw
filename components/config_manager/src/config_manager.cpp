@@ -58,7 +58,7 @@ static TankSetupConfig parse_tank(const cJSON* obj) noexcept {
         .id               = safe_int(obj, "id"),
         .capacity_litres  = safe_float(obj, "capacity_litres"),
         .shape            = safe_string(obj, "shape"),
-        .height_cm        = safe_float(obj, "height_cm"),
+        .height_mm       = safe_float(obj, "height_mm"),
         .full_level_mm    = safe_int(obj, "full_level_mm", 0),
         .low_level_mm     = safe_int(obj, "low_level_mm", 0),
     };

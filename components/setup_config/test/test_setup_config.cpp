@@ -25,7 +25,7 @@ TEST_CASE("TankSetupConfig: fields round-trip correctly", "[setup_config]")
         .id = 1,
         .capacity_litres = 1000.0f,
         .shape = "RECTANGULAR",
-        .height_cm = 200.0f,
+        .height_mm = 200.0f * 10,
         .full_level_mm = 1800,
         .low_level_mm = 200,
     };
@@ -122,7 +122,7 @@ TEST_CASE("PumpControlUnitSetupConfig: aggregates all sub-configs", "[setup_conf
     PumpControlUnitSetupConfig pcu{
         .id = 1,
         .pumps           = {{.id=1, .make="P", .power_hp=1.0f, .current_rating=5.0f, .min_working_current=0.5f}},
-        .tanks           = {{.id=1, .capacity_litres=1000.0f, .shape="RECTANGULAR", .height_cm=200.0f, .full_level_mm=1800, .low_level_mm=200}},
+        .tanks           = {{.id=1, .capacity_litres=1000.0f, .shape="RECTANGULAR", .height_mm =200.0f*10, .full_level_mm=1800, .low_level_mm=200}},
         .relays          = {{.id=1, .pin_number=23}},
         .current_sensors = {{.id=2, .interface={.type=CurrentSensorInterfaceType::InternalADC, .channel=0}, .make=CurrentSensorMakeType::ACS712, .max_current=20.0f, .read_mode=CurrentSensorReadModeType::Basic}},
         .level_sensors   = {{.id=1, .address=1, .protocol=LevelSensorProtocolType::GA1}},

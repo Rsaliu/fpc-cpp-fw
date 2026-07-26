@@ -29,7 +29,7 @@ static TankConfig make_valid_config()
         .id              = 1,
         .capacity_litres = 1000.0f,
         .shape           = TankShape::Rectangle,
-        .height_cm       = 100.0f,
+        .height_mm       = 100.0f * 10,
         .full_level_mm   = 900,
         .low_level_mm    = 100,
     };
@@ -101,7 +101,7 @@ TEST_CASE("Tank::init succeeds with valid config", "[tank]")
 TEST_CASE("Tank::init returns InvalidParameter when id < 0", "[tank]")
 {
     Tank tank{TankConfig{.id=-1, .capacity_litres=1000.f,
-                         .shape=TankShape::Rectangle, .height_cm=100.f,
+                         .shape=TankShape::Rectangle, .height_mm=100.f*10,
                          .full_level_mm=900, .low_level_mm=100}};
     auto r = tank.init();
     TEST_ASSERT_TRUE(r.is_err());
@@ -112,7 +112,7 @@ TEST_CASE("Tank::init returns InvalidParameter when id < 0", "[tank]")
 TEST_CASE("Tank::init returns InvalidParameter when capacity <= 0", "[tank]")
 {
     Tank tank{TankConfig{.id=1, .capacity_litres=0.f,
-                         .shape=TankShape::Rectangle, .height_cm=100.f,
+                         .shape=TankShape::Rectangle, .height_mm=100.f*10,
                          .full_level_mm=900, .low_level_mm=100}};
     TEST_ASSERT_TRUE(tank.init().is_err());
 }
@@ -120,7 +120,7 @@ TEST_CASE("Tank::init returns InvalidParameter when capacity <= 0", "[tank]")
 TEST_CASE("Tank::init returns InvalidParameter when height <= 0", "[tank]")
 {
     Tank tank{TankConfig{.id=1, .capacity_litres=1000.f,
-                         .shape=TankShape::Rectangle, .height_cm=0.f,
+                         .shape=TankShape::Rectangle, .height_mm=0.f,
                          .full_level_mm=900, .low_level_mm=100}};
     TEST_ASSERT_TRUE(tank.init().is_err());
 }
@@ -128,7 +128,7 @@ TEST_CASE("Tank::init returns InvalidParameter when height <= 0", "[tank]")
 TEST_CASE("Tank::init returns InvalidParameter when full_level <= low_level", "[tank]")
 {
     Tank tank{TankConfig{.id=1, .capacity_litres=1000.f,
-                         .shape=TankShape::Rectangle, .height_cm=100.f,
+                         .shape=TankShape::Rectangle, .height_mm=100.f*10,
                          .full_level_mm=100, .low_level_mm=900}}; // swapped
     TEST_ASSERT_TRUE(tank.init().is_err());
 }
@@ -136,7 +136,7 @@ TEST_CASE("Tank::init returns InvalidParameter when full_level <= low_level", "[
 TEST_CASE("Tank::init returns InvalidParameter when levels are equal", "[tank]")
 {
     Tank tank{TankConfig{.id=1, .capacity_litres=1000.f,
-                         .shape=TankShape::Rectangle, .height_cm=100.f,
+                         .shape=TankShape::Rectangle, .height_mm=100.f*10,
                          .full_level_mm=500, .low_level_mm=500}};
     TEST_ASSERT_TRUE(tank.init().is_err());
 }
@@ -154,7 +154,7 @@ TEST_CASE("Tank::init returns InvalidState when called twice", "[tank]")
 TEST_CASE("Tank::init works for Cylinder shape", "[tank]")
 {
     Tank tank{TankConfig{.id=2, .capacity_litres=500.f,
-                         .shape=TankShape::Cylinder, .height_cm=80.f,
+                         .shape=TankShape::Cylinder, .height_mm=80.f*10,
                          .full_level_mm=750, .low_level_mm=50}};
     TEST_ASSERT_TRUE(tank.init().is_ok());
 }
@@ -211,7 +211,7 @@ TEST_CASE("Tank::get_config returns all fields correctly", "[tank]")
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 1000.0f, cfg.capacity_litres);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(TankShape::Rectangle),
                           static_cast<int>(cfg.shape));
-    TEST_ASSERT_FLOAT_WITHIN(0.01f, 100.0f, cfg.height_cm);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 1000.0f, cfg.height_mm);
     TEST_ASSERT_EQUAL_INT(900, cfg.full_level_mm);
     TEST_ASSERT_EQUAL_INT(100, cfg.low_level_mm);
 }

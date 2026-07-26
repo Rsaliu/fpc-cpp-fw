@@ -32,8 +32,9 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Starting test suite...");
 
     UNITY_BEGIN();
-    unity_run_all_tests();
+    unity_run_all_tests();   
     UNITY_END();
 
     ESP_LOGI(TAG, "Test suite complete.");
 }
+    

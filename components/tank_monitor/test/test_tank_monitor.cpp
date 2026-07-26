@@ -18,7 +18,7 @@ static fpc::TankMonitorConfig make_config(
     tank_cfg.id             = 1;
     tank_cfg.capacity_litres = 1000.0f;
     tank_cfg.shape          = fpc::TankShape::Rectangle;
-    tank_cfg.height_cm      = 100.0f;
+    tank_cfg.height_mm      = 100.0f * 10;
     tank_cfg.full_level_mm  = 900;
     tank_cfg.low_level_mm   = 100;
 

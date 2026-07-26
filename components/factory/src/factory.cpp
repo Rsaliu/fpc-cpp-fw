@@ -77,7 +77,7 @@ Result<Application> Factory::create_from_config(
             .id               = ts.id,
             .capacity_litres  = ts.capacity_litres,
             .shape            = tank_shape_from_setup(ts.shape),
-            .height_cm        = ts.height_cm,
+            .height_mm       = ts.height_mm,
             .full_level_mm    = ts.full_level_mm,
             .low_level_mm     = ts.low_level_mm,
         };
