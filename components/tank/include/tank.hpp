@@ -90,7 +90,7 @@ struct TankConfig {
     int32_t   id{-1};                       ///< Application-level identifier (>= 0).
     float     capacity_litres{0.0f};        ///< Total volume in litres (> 0).
     TankShape shape{TankShape::Rectangle};  ///< Physical shape.
-    float     height_cm{0.0f};             ///< Physical height in centimetres (> 0).
+    float     height_mm{0.0f};             ///< Physical height in centimetres (> 0).
     int32_t   full_level_mm{0};            ///< Sensor reading that means "full" (mm).
     int32_t   low_level_mm{0};             ///< Sensor reading that means "low" (mm).
     int32_t   container_height_mm{0};      ///< Height of the container
@@ -110,7 +110,7 @@ struct TankConfig {
  * @code
  *   Tank tank{TankConfig{.id=1, .capacity_litres=1000.f,
  *                        .shape=TankShape::Rectangle,
- *                        .height_cm=100.f,
+ *                        .height_mm=100.f*10,
  *                        .full_level_mm=900, .low_level_mm=100}};
  *   tank.init();
  *   ESP_LOGI(TAG, "%s", tank.format_info().c_str());

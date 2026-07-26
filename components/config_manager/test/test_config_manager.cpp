@@ -22,7 +22,7 @@ static const char* kSampleJson =
 "          \"id\": 1,"
 "          \"capacity_litres\": 1000.0,"
 "          \"shape\": \"RECTANGULAR\","
-"          \"height_cm\": 200.0,"
+"          \"height_mm\": 2000,"  // 200 cm converted to mm
 "          \"full_level_mm\": 1800,"
 "          \"low_level_mm\": 200"
 "        }"
@@ -118,7 +118,7 @@ TEST_CASE("parse: tanks fields", "[config_manager]")
     TEST_ASSERT_EQUAL_INT(1, tanks[0].id);
     TEST_ASSERT_FLOAT_WITHIN(0.1f, 1000.0f, tanks[0].capacity_litres);
     TEST_ASSERT_EQUAL_STRING("RECTANGULAR", tanks[0].shape.c_str());
-    TEST_ASSERT_FLOAT_WITHIN(0.1f, 200.0f, tanks[0].height_cm);
+    TEST_ASSERT_FLOAT_WITHIN(0.1f, 2000.0f, tanks[0].height_mm);
     TEST_ASSERT_EQUAL_INT(1800, tanks[0].full_level_mm);
     TEST_ASSERT_EQUAL_INT(200,  tanks[0].low_level_mm);
 }

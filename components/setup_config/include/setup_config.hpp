@@ -125,7 +125,7 @@ struct TankSetupConfig {
     int32_t     id{-1};
     float       capacity_litres{0.0f};
     std::string shape{};          ///< "RECTANGULAR" or "CYLINDRICAL"
-    float       height_cm{0.0f};
+    float       height_mm{0.0f};
     int32_t     full_level_mm{0};
     int32_t     low_level_mm{0};
 };
