@@ -75,6 +75,10 @@ Result<void> TankMonitor::check_level()
         Span<const uint16_t>{samples_, static_cast<size_t>(config_.number_of_samples)},
         full_mm,
         low_mm);
+    
+    if (sm_state_ == TankStateMachineState::InvalidState){
+        return Result<void>::err(SystemError::InvalidState);
+    }
 
     if (sm_state_ != prev) {
         ESP_LOGW(TAG, "State changed: %d -> %d",
