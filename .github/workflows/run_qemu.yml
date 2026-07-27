@@ -1,0 +1,104 @@
+name: ESP32 Unity Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+
+jobs:
+  unity-tests:
+    name: Unity tests with QEMU
+    runs-on: ubuntu-24.04
+
+    container:
+      image: espressif/idf:release-v5.5
+
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Mark repository as safe for git
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install QEMU dependencies
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y \
+            libgcrypt20 \
+            libglib2.0-0 \
+            libpixman-1-0 \
+            libsdl2-2.0-0 \
+            libslirp0
+
+      - name: Install Espressif QEMU
+        shell: bash
+        run: |
+          python "$IDF_PATH/tools/idf_tools.py" install qemu-xtensa
+
+      - name: Install test dependencies
+        shell: bash
+        run: |
+          . "$IDF_PATH/export.sh"
+
+          python -m pip install --upgrade pip
+          python -m pip install \
+            pytest \
+            pytest-embedded \
+            pytest-embedded-idf \
+            pytest-embedded-serial \
+            pytest-embedded-serial-esp \
+            pytest-embedded-qemu
+
+      - name: Configure ESP32 target
+        shell: bash
+        working-directory: unity-app
+        run: |
+          . "$IDF_PATH/export.sh"
+
+          idf.py set-target esp32s3
+
+      - name: Build Unity test application
+        shell: bash
+        working-directory: unity-app
+        run: |
+          . "$IDF_PATH/export.sh"
+
+          idf.py build
+
+      - name: Run Unity tests in QEMU
+        shell: bash
+        run: |
+          . "$IDF_PATH/export.sh"
+
+          pytest pytest_unity.py \
+            -v \
+            -s \
+            --embedded-services=idf,qemu \
+            --target=esp32s3 \
+            --app-path=./unity-app \
+            --build-dir=build \
+            --junitxml=./unity-app/build/unity-test-results.xml
+
+      - name: Show QEMU console log on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "==== DUT logs ===="
+          find /tmp/pytest-embedded -name '*.log' -exec sh -c 'echo "--- $1 ---"; cat "$1"' _ {} \;
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-unity-test-results
+          path: |
+            unity-app/build/unity-test-results.xml
+            /tmp/pytest-embedded/
+          if-no-files-found: ignore

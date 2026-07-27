@@ -18,7 +18,6 @@
 #include <cstdio>
 #include "unity.h"
 #include "esp_log.h"
-#include "esp_spiffs.h"
 
 static constexpr char TAG[] = "TEST_RUNNER";
 
@@ -33,7 +32,13 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Starting test suite...");
 
     UNITY_BEGIN();
-    unity_run_tests_by_tag("[file_handler]", false);
+    /* Run every registered test EXCEPT those tagged [hw].
+     * Tag any test that needs real hardware (UART/RS485 loopback, ADC
+     * readings, WiFi, MQTT, SPIFFS images, ...) with "[hw]" so it is
+     * skipped under QEMU, e.g.:
+     *   TEST_CASE("Rs485 echo", "[rs485][hw]") { ... }
+     * invert=true means "run all tests NOT matching the tag".            */
+    unity_run_tests_by_tag("[hw]", true);
     UNITY_END();
 
     ESP_LOGI(TAG, "Test suite complete.");
