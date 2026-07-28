@@ -99,6 +99,13 @@ Result<uint16_t> LevelSensor::read()
         return interp;
     }
 
+    uint32_t distance_to_sensor = interp.value();
+
+    if (distance_to_sensor <= m_config.blindspot_mm){
+        ESP_LOGE(TAG, "The liquid distance is within or below the blindspot");
+        return Result<uint16_t>::err(SystemError::InvalidLevelReading);
+    }
+
     ESP_LOGI(TAG, "[id=%ld] level=%u mm", m_config.id, interp.value());
     return interp;
 }

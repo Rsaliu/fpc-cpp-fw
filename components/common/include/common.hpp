@@ -53,6 +53,7 @@ enum class SystemError : uint8_t {
     OperationFailed,         ///< Operation could not be completed.
     InvalidResponse,         ///< Response from remote device was malformed.
     OutOfRange,              ///< Value falls outside the allowed range.
+    InvalidLevelReading,     ///< Invalid level sensor reading
 };
 
 /**

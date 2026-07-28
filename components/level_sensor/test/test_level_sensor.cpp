@@ -273,3 +273,38 @@ TEST_CASE("ILevelSensor pointer works with LevelSensor read()", "[level_sensor]"
     TEST_ASSERT_TRUE(r.is_ok());
     TEST_ASSERT_EQUAL_UINT16(754u, r.value());
 }
+
+TEST_CASE("LevelSensor: read return if it is below the blindspot", "[level_sensor]")
+{
+    auto cfg = make_valid_config();
+    cfg.blindspot_mm = 800u;
+    LevelSensor sensor{std::move(cfg)};
+    sensor.init();
+    auto r = sensor.read();
+    TEST_ASSERT_TRUE(r.is_err());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SystemError::InvalidLevelReading),
+                          static_cast<int>(r.error()));
+}
+
+TEST_CASE("LevelSensor: read return if it is equal to the blindspot", "[level_sensor]")
+{
+    auto cfg = make_valid_config();
+    cfg.blindspot_mm = 754u;
+    LevelSensor sensor{std::move(cfg)};
+    sensor.init();
+    auto r = sensor.read();
+    TEST_ASSERT_TRUE(r.is_err());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SystemError::InvalidLevelReading),
+                          static_cast<int>(r.error()));
+}
+
+TEST_CASE("LevelSensor: read return if it is greater than the blindspot", "[level_sensor]")
+{
+    auto cfg = make_valid_config();
+    cfg.blindspot_mm = 500u;
+    LevelSensor sensor{std::move(cfg)};
+    sensor.init();
+    auto r = sensor.read();
+    TEST_ASSERT_TRUE(r.is_ok());
+    TEST_ASSERT_EQUAL_UINT16(754u, r.value());
+} 
