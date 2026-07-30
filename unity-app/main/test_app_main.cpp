@@ -32,13 +32,17 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Starting test suite...");
 
     UNITY_BEGIN();
-    /* Run every registered test EXCEPT those tagged [hw].
-     * Tag any test that needs real hardware (UART/RS485 loopback, ADC
-     * readings, WiFi, MQTT, SPIFFS images, ...) with "[hw]" so it is
-     * skipped under QEMU, e.g.:
-     *   TEST_CASE("Rs485 echo", "[rs485][hw]") { ... }
-     * invert=true means "run all tests NOT matching the tag".            */
+#ifdef FPC_SKIP_HW_TESTS
+    /* CI/QEMU build (FPC_SKIP_HW_TESTS env var set at build time):
+     * run every registered test EXCEPT those tagged [hw].
+     * invert=true means "run all tests NOT matching the tag". */
+    ESP_LOGW(TAG, "FPC_SKIP_HW_TESTS set - skipping [hw]-tagged tests");
     unity_run_tests_by_tag("[hw]", true);
+#else
+    /* Local/hardware build: run everything, including [hw] tests. */
+    ESP_LOGI(TAG, "FPC_SKIP_HW_TESTS not set - running all tests including [hw]");
+    unity_run_all_tests();
+#endif
     UNITY_END();
 
     ESP_LOGI(TAG, "Test suite complete.");

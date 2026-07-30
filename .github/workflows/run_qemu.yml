@@ -18,6 +18,12 @@ jobs:
 
     timeout-minutes: 20
 
+    env:
+      # Compile the Unity runner to skip [hw]-tagged tests (no real
+      # hardware/network available under QEMU). Locally, build without
+      # this variable to run all tests including [hw].
+      FPC_SKIP_HW_TESTS: "1"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

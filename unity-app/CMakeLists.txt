@@ -50,7 +50,7 @@ set(TEST_COMPONENTS
     common event relay_driver pump tank protocol utils
     rs485 level_sensor tank_monitor tank_monitor_task
     setup_config config_manager setup_config_button file_handler
-    event_handler_task mqtt_conn comms_manager webserver webserver_task ota_handler mdns wifi_hotspot
+    event_handler_task mqtt_conn comms_manager webserver ota_handler mdns wifi_hotspot
     pump_monitor
 )
 
