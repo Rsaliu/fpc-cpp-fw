@@ -251,6 +251,7 @@ Result<Application> Factory::create_from_config(
             .level_read_cb     = std::move(level_cb),
             .number_of_samples = 10,
             .analytics_cb      = level_analytics_basic_decision,
+            .analytics_ft      = level_analytics_from_top,
         };
         app.tank_monitors.push_back(std::make_unique<TankMonitor>(std::move(tmc)));
         if (auto r = app.tank_monitors.back()->init(); r.is_err()) {

@@ -43,15 +43,22 @@ enum class TankStateMachineState : uint8_t {
 /// Injected analytics callback.
 /// Receives (samples, full_level_mm, low_level_mm) and returns the new state.
 using LevelAnalyticsCallback = std::function<
-    TankStateMachineState(Span<const uint16_t>, int32_t, int32_t)>;
+    TankStateMachineState(Span<const uint16_t>, int32_t, int32_t, int32_t)>;
 
 /// Built-in average-based decision function.
 /// Usable directly as a LevelAnalyticsCallback or in unit tests.
 [[nodiscard]] TankStateMachineState level_analytics_basic_decision(
     Span<const uint16_t> samples,
     int32_t full_level_mm,
-    int32_t low_level_mm) noexcept;
+    int32_t low_level_mm,
+    int32_t container_height_mm) noexcept;
 
+
+[[nodiscard]] TankStateMachineState level_analytics_from_top(
+    Span<const uint16_t> samples,
+    int32_t full_level_mm,
+    int32_t low_level_mm,
+    int32_t container_height_mm) noexcept;
 // ─── Callbacks ────────────────────────────────────────────────────────────────
 
 /// Zero-argument callable that returns a raw level reading in mm.
@@ -76,6 +83,7 @@ struct TankMonitorConfig {
     LevelReadCallback      level_read_cb;         ///< std::function<Result<uint16_t>()>
     int32_t                number_of_samples{1};  ///< 1 .. TankMonitor::kMaxSamples
     LevelAnalyticsCallback analytics_cb;
+    LevelAnalyticsCallback analytics_ft;
 };
 
 // ─── Monitor state ────────────────────────────────────────────────────────────
