@@ -93,6 +93,7 @@ struct TankConfig {
     float     height_cm{0.0f};             ///< Physical height in centimetres (> 0).
     int32_t   full_level_mm{0};            ///< Sensor reading that means "full" (mm).
     int32_t   low_level_mm{0};             ///< Sensor reading that means "low" (mm).
+    int32_t   container_height_mm{0};      ///< Height of the container
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
