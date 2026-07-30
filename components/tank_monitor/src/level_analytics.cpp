@@ -11,8 +11,8 @@ TankStateMachineState level_analytics_basic_decision(
     int32_t low_level_mm) noexcept
 {
     if (samples.empty()) {
-        ESP_LOGW(kAnalyticsTag, "Empty samples — defaulting to Low");
-        return TankStateMachineState::Low;
+        ESP_LOGW(kAnalyticsTag, "Empty samples — Invalid State");
+        return TankStateMachineState::InvalidState;
     }
 
     uint32_t sum = 0;

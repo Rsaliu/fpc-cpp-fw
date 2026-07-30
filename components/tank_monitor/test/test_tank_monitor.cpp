@@ -37,7 +37,7 @@ static fpc::TankMonitorConfig make_config(
         int32_t low_mm) -> fpc::TankStateMachineState
     {
         if (samples.empty()) {
-            return fpc::TankStateMachineState::Low;
+            return fpc::TankStateMachineState::InvalidState;
         }
         int32_t sum = 0;
         for (uint16_t v : samples) { sum += v; }
@@ -85,11 +85,11 @@ TEST_CASE("basic_decision: at low level → Low", "[tank_monitor]")
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Low, state);
 }
 
-TEST_CASE("basic_decision: empty span → Low", "[tank_monitor]")
+TEST_CASE("basic_decision: empty span → InvalidState", "[tank_monitor]")
 {
     auto state = fpc::level_analytics_basic_decision(
         fpc::Span<const uint16_t>{}, 900, 100);
-    TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Low, state);
+    TEST_ASSERT_EQUAL(fpc::TankStateMachineState::InvalidState, state);
 }
 
 // ─── TankMonitor lifecycle ────────────────────────────────────────────────────

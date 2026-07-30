@@ -35,6 +35,7 @@ enum class TankStateMachineState : uint8_t {
     Normal = 0, ///< Level is within normal operating range.
     Full   = 1, ///< Level has reached or exceeded full_level_mm.
     Low    = 2, ///< Level has dropped to or below low_level_mm.
+    InvalidState = 3, // when empty sample is read
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
