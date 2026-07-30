@@ -16,14 +16,14 @@ TEST_CASE("Webserver: constructed in Uninitialized state", "[webserver]")
     TEST_ASSERT_NULL(ws.get_handle());
 }
 
-TEST_CASE("Webserver: start() before init() returns InvalidState", "[webserver]")
+TEST_CASE("Webserver: start() before init() returns InvalidState", "[webserver][hw]")
 {
     fpc::Webserver ws{make_config()};
     TEST_ASSERT_TRUE(ws.start().is_err());
     TEST_ASSERT_EQUAL_INT((int)fpc::SystemError::InvalidState, (int)ws.start().error());
 }
 
-TEST_CASE("Webserver: stop() before start() returns InvalidState", "[webserver]")
+TEST_CASE("Webserver: stop() before start() returns InvalidState", "[webserver][hw]")
 {
     fpc::Webserver ws{make_config()};
     (void)ws.init();
@@ -37,7 +37,7 @@ TEST_CASE("Webserver: deinit() before init() returns InvalidState", "[webserver]
     TEST_ASSERT_TRUE(ws.deinit().is_err());
 }
 
-TEST_CASE("Webserver: double init() returns InvalidState", "[webserver]")
+TEST_CASE("Webserver: double init() returns InvalidState", "[webserver][hw]")
 {
     fpc::Webserver ws{make_config()};
     (void)ws.init();
@@ -67,7 +67,7 @@ TEST_CASE("Webserver: add_route when not running returns InvalidState", "[webser
     (void)ws.deinit();
 }
 
-TEST_CASE("Webserver: full lifecycle init start stop deinit", "[webserver]")
+TEST_CASE("Webserver: full lifecycle init start stop deinit", "[webserver][hw]")
 {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());

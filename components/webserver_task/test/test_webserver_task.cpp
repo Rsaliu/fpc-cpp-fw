@@ -26,7 +26,7 @@ TEST_CASE("WebserverTask: stop without start returns InvalidState", "[webserver_
     TEST_ASSERT_EQUAL_INT((int)fpc::SystemError::InvalidState, (int)task.stop().error());
 }
 
-TEST_CASE("WebserverTask: double start returns InvalidState", "[webserver_task]")
+TEST_CASE("WebserverTask: double start returns InvalidState", "[webserver_task][hw]")
 {
     fpc::WebserverTask task{make_cfg()};
     TEST_ASSERT_TRUE(task.start().is_ok());
@@ -37,7 +37,7 @@ TEST_CASE("WebserverTask: double start returns InvalidState", "[webserver_task]"
     (void)task.stop();
 }
 
-TEST_CASE("WebserverTask: start sets is_running", "[webserver_task]")
+TEST_CASE("WebserverTask: start sets is_running", "[webserver_task][hw]")
 {
     fpc::WebserverTask task{make_cfg()};
     TEST_ASSERT_TRUE(task.start().is_ok());
@@ -47,7 +47,7 @@ TEST_CASE("WebserverTask: start sets is_running", "[webserver_task]")
     TEST_ASSERT_FALSE(task.is_running());
 }
 
-TEST_CASE("WebserverTask: setup_fn invoked after start", "[webserver_task]")
+TEST_CASE("WebserverTask: setup_fn invoked after start", "[webserver_task][hw]")
 {
     bool setup_called = false;
     fpc::WebserverTaskConfig cfg = make_cfg();
