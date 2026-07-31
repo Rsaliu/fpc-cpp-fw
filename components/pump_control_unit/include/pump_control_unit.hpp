@@ -74,6 +74,16 @@ public:
         int32_t pm_id,
         int32_t event_id);
 
+    /// Subscribe an event callback on the tank monitor identified by `tm_id`.
+    /// Returns the slot index (event_id) on success.
+    [[nodiscard]] Result<int32_t> add_subscriber_to_tank_monitor(
+        int32_t                  tm_id,
+        TankMonitorEventCallback callback);
+
+    [[nodiscard]] Result<void> remove_subscriber_from_tank_monitor(
+        int32_t tm_id,
+        int32_t event_id);
+
     // ── Polling loops ─────────────────────────────────────────────────────────
 
     /// Calls `check_current()` on every registered pump monitor.
