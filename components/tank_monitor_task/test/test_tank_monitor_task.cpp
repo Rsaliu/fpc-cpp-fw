@@ -9,6 +9,8 @@ static const char* TAG = "test_tank_monitor_task";
 // ─── Mock ITankMonitor ────────────────────────────────────────────────────────
 
 /// Minimal mock: counts check_level() invocations.
+// Anonymous namespace: prevents ODR clashes with same-named mocks in other tests.
+namespace {
 class MockTankMonitor final : public fpc::ITankMonitor {
 public:
     int  check_count{0};
@@ -32,6 +34,7 @@ public:
         return fpc::Result<void>::ok();
     }
 };
+} // namespace
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

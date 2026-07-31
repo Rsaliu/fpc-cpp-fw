@@ -47,7 +47,7 @@ Result<void> PumpControlUnit::add_pump_monitor(IPumpMonitor& monitor)
         ESP_LOGW(TAG, "PumpMonitor id=%d already registered", (int)mid);
         return Result<void>::err(SystemError::InvalidParameter);
     }
-    pump_monitors_[mid] = &monitor;
+    pump_monitors_.emplace(mid,monitor);
     ESP_LOGI(TAG, "PumpMonitor id=%d added", (int)mid);
     return Result<void>::ok();
 }
@@ -81,7 +81,7 @@ Result<void> PumpControlUnit::add_tank_monitor(ITankMonitor& monitor)
         ESP_LOGW(TAG, "TankMonitor id=%d already registered", (int)mid);
         return Result<void>::err(SystemError::InvalidParameter);
     }
-    tank_monitors_[mid] = &monitor;
+    tank_monitors_.emplace(mid, monitor);
     ESP_LOGI(TAG, "TankMonitor id=%d added", (int)mid);
     return Result<void>::ok();
 }
@@ -114,7 +114,7 @@ Result<int32_t> PumpControlUnit::add_subscriber_to_pump_monitor(
         ESP_LOGW(TAG, "PumpMonitor id=%d not found for subscribe", (int)pm_id);
         return Result<int32_t>::err(SystemError::InvalidParameter);
     }
-    auto res = it->second->subscribe(std::move(callback));
+    auto res = it->second.get().subscribe(std::move(callback));
     if (res.is_ok()) {
         ESP_LOGI(TAG, "Subscribed to PumpMonitor id=%d, event_id=%d",
                  (int)pm_id, (int)res.value());
@@ -133,7 +133,7 @@ Result<void> PumpControlUnit::remove_subscriber_from_pump_monitor(
     if (it == pump_monitors_.end()) {
         return Result<void>::err(SystemError::InvalidParameter);
     }
-    auto res = it->second->unsubscribe(event_id);
+    auto res = it->second.get().unsubscribe(event_id);
     if (res.is_ok()) {
         ESP_LOGI(TAG, "Unsubscribed from PumpMonitor id=%d, event_id=%d",
                  (int)pm_id, (int)event_id);
@@ -149,7 +149,7 @@ Result<void> PumpControlUnit::loop_pump_monitors()
         return Result<void>::err(SystemError::InvalidState);
     }
     for (auto& [id, pm] : pump_monitors_) {
-        auto res = pm->check_current();
+        auto res = pm.get().check_current();
         if (res.is_err()) {
             ESP_LOGE(TAG, "check_current failed on PumpMonitor id=%d: %d",
                      (int)id, (int)res.error());
@@ -164,7 +164,7 @@ Result<void> PumpControlUnit::loop_level_monitors()
         return Result<void>::err(SystemError::InvalidState);
     }
     for (auto& [id, tm] : tank_monitors_) {
-        auto res = tm->check_level();
+        auto res = tm.get().check_level();
         if (res.is_err()) {
             ESP_LOGE(TAG, "check_level failed on TankMonitor id=%d: %d",
                      (int)id, (int)res.error());

@@ -10,6 +10,8 @@ static const char* TAG = "test_pump_monitor_task";
 
 /// Minimal mock: counts check_current() invocations.
 /// Optionally injects a failure after a threshold.
+// Anonymous namespace: prevents ODR clashes with same-named mocks in other tests.
+namespace {
 class MockPumpMonitor final : public fpc::IPumpMonitor {
 public:
     int  check_count{0};
@@ -33,6 +35,7 @@ public:
         return fpc::Result<void>::ok();
     }
 };
+} // namespace
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
