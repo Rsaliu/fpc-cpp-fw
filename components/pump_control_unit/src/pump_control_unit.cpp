@@ -141,6 +141,47 @@ Result<void> PumpControlUnit::remove_subscriber_from_pump_monitor(
     return res;
 }
 
+
+Result<int32_t> PumpControlUnit::add_subscriber_to_tank_monitor(
+    int32_t                  tm_id,
+    TankMonitorEventCallback callback)
+{
+    if (!initialized_) {
+        return Result<int32_t>::err(SystemError::InvalidState);
+    }
+    auto it = tank_monitors_.find(tm_id);
+    if (it == tank_monitors_.end()) {
+        ESP_LOGW(TAG, "TankMonitor id=%d not found for subscribe", (int)tm_id);
+        return Result<int32_t>::err(SystemError::InvalidParameter);
+    }
+    auto res = it->second.get().subscribe(std::move(callback));
+    if (res.is_ok()) {
+        ESP_LOGI(TAG, "Subscribed to PumpMonitor id=%d, event_id=%d",
+                 (int)tm_id, (int)res.value());
+    }
+    return res;
+}
+
+Result<void> PumpControlUnit::remove_subscriber_from_tank_monitor(
+    int32_t tm_id,
+    int32_t event_id)
+{
+    if (!initialized_) {
+        return Result<void>::err(SystemError::InvalidState);
+    }
+    auto it = tank_monitors_.find(tm_id);
+    if (it == tank_monitors_.end()) {
+        return Result<void>::err(SystemError::InvalidParameter);
+    }
+    auto res = it->second.get().unsubscribe(event_id);
+    if (res.is_ok()) {
+        ESP_LOGI(TAG, "Unsubscribed from TankMonitor id=%d, event_id=%d",
+                 (int)tm_id, (int)event_id);
+    }
+    return res;
+}
+
+
 // ─── Polling loops ────────────────────────────────────────────────────────────
 
 Result<void> PumpControlUnit::loop_pump_monitors()

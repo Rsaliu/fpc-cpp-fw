@@ -284,6 +284,71 @@ TEST_CASE("PumpControlUnit: remove_subscriber_from_pump_monitor succeeds", "[pum
     TEST_ASSERT_TRUE(unsub.is_ok());
 }
 
+// ─── Tank-monitor subscriber helpers ─────────────────────────────────────────
+
+TEST_CASE("PumpControlUnit: add_subscriber_to_tank_monitor succeeds", "[pump_control_unit]")
+{
+    fpc::PumpControlUnit pcu;
+    pcu.init();
+
+    MockTankMonitor tm{1};
+    pcu.add_tank_monitor(tm);
+
+    auto res = pcu.add_subscriber_to_tank_monitor(
+        1, [](fpc::EventType, int32_t) {});
+    TEST_ASSERT_TRUE(res.is_ok());
+    TEST_ASSERT_EQUAL(0, res.value());  // MockTankMonitor::subscribe returns 0
+}
+
+TEST_CASE("PumpControlUnit: add_subscriber_to_tank_monitor fails when not initialized", "[pump_control_unit]")
+{
+    fpc::PumpControlUnit pcu;
+    auto res = pcu.add_subscriber_to_tank_monitor(1, [](fpc::EventType, int32_t){});
+    TEST_ASSERT_TRUE(res.is_err());
+    TEST_ASSERT_EQUAL(fpc::SystemError::InvalidState, res.error());
+}
+
+TEST_CASE("PumpControlUnit: add_subscriber_to_tank_monitor fails for unknown id", "[pump_control_unit]")
+{
+    fpc::PumpControlUnit pcu;
+    pcu.init();
+    auto res = pcu.add_subscriber_to_tank_monitor(99, [](fpc::EventType, int32_t){});
+    TEST_ASSERT_TRUE(res.is_err());
+    TEST_ASSERT_EQUAL(fpc::SystemError::InvalidParameter, res.error());
+}
+
+TEST_CASE("PumpControlUnit: remove_subscriber_from_tank_monitor succeeds", "[pump_control_unit]")
+{
+    fpc::PumpControlUnit pcu;
+    pcu.init();
+
+    MockTankMonitor tm{1};
+    pcu.add_tank_monitor(tm);
+
+    auto sub = pcu.add_subscriber_to_tank_monitor(1, [](fpc::EventType, int32_t){});
+    TEST_ASSERT_TRUE(sub.is_ok());
+
+    auto unsub = pcu.remove_subscriber_from_tank_monitor(1, sub.value());
+    TEST_ASSERT_TRUE(unsub.is_ok());
+}
+
+TEST_CASE("PumpControlUnit: remove_subscriber_from_tank_monitor fails when not initialized", "[pump_control_unit]")
+{
+    fpc::PumpControlUnit pcu;
+    auto res = pcu.remove_subscriber_from_tank_monitor(1, 0);
+    TEST_ASSERT_TRUE(res.is_err());
+    TEST_ASSERT_EQUAL(fpc::SystemError::InvalidState, res.error());
+}
+
+TEST_CASE("PumpControlUnit: remove_subscriber_from_tank_monitor fails for unknown id", "[pump_control_unit]")
+{
+    fpc::PumpControlUnit pcu;
+    pcu.init();
+    auto res = pcu.remove_subscriber_from_tank_monitor(99, 0);
+    TEST_ASSERT_TRUE(res.is_err());
+    TEST_ASSERT_EQUAL(fpc::SystemError::InvalidParameter, res.error());
+}
+
 // ─── Polling loops ────────────────────────────────────────────────────────────
 
 TEST_CASE("PumpControlUnit: loop_pump_monitors calls check_current on all", "[pump_control_unit]")
