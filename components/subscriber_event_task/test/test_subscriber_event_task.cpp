@@ -3,6 +3,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+// Anonymous namespace: prevents ODR clashes with same-named mocks in other tests.
+namespace {
 class MockTankMonitor final : public fpc::ITankMonitor {
 public:
     bool    fail_subscribe{false};
@@ -27,6 +29,7 @@ public:
         return fpc::Result<void>::ok();
     }
 };
+} // namespace
 
 static fpc::SubscriberEventTaskConfig make_cfg(MockTankMonitor* m)
 {

@@ -4,8 +4,11 @@
 
 static const char* TAG = "test_pump_control_unit";
 
-// ─── Mock monitors ────────────────────────────────────────────────────────────
-
+// ─── Mock monitors ────────────────────────────────────────────────────────────// NOTE: wrapped in an anonymous namespace — identically named mock classes
+// exist in other test files; without internal linkage the linker merges
+// their vtables (ODR violation) and virtual calls dispatch into the wrong
+// file's implementation.
+namespace {
 struct MockPumpMonitor final : public fpc::IPumpMonitor {
     int32_t mid;
     int     check_count{0};
@@ -53,6 +56,8 @@ struct MockTankMonitor final : public fpc::ITankMonitor {
         return fpc::Result<void>::ok();
     }
 };
+
+} // namespace
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -326,16 +331,13 @@ TEST_CASE("PumpControlUnit: loop_level_monitors calls check_level on all", "[pum
 {
     fpc::PumpControlUnit pcu;
     pcu.init();
-
     MockTankMonitor t1{1}, t2{2};
     pcu.add_tank_monitor(t1);
     pcu.add_tank_monitor(t2);
-
     auto res = pcu.loop_level_monitors();
     TEST_ASSERT_TRUE(res.is_ok());
     TEST_ASSERT_EQUAL(1, t1.check_count);
     TEST_ASSERT_EQUAL(1, t2.check_count);
-
     ESP_LOGI(TAG, "t1=%d t2=%d", t1.check_count, t2.check_count);
 }
 

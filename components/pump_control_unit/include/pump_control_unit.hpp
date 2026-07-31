@@ -83,8 +83,8 @@ public:
     [[nodiscard]] Result<void> loop_level_monitors();
 
 private:
-    std::unordered_map<int32_t, IPumpMonitor*> pump_monitors_;
-    std::unordered_map<int32_t, ITankMonitor*> tank_monitors_;
+    std::unordered_map<int32_t, std::reference_wrapper<IPumpMonitor>> pump_monitors_;
+    std::unordered_map<int32_t, std::reference_wrapper<ITankMonitor>> tank_monitors_;
     bool initialized_{false};
 };
 

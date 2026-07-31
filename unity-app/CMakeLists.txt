@@ -33,6 +33,7 @@ set(EXTRA_COMPONENT_DIRS
     "../components/wifi_hotspot"
     "../components/pump_monitor"
     "../components/current_sensor"
+    "../components/pump_control_unit"
     "../third_party/esp-protocols/components/mdns"
 
 )
@@ -51,7 +52,7 @@ set(TEST_COMPONENTS
     rs485 level_sensor tank_monitor tank_monitor_task
     setup_config config_manager setup_config_button file_handler
     event_handler_task mqtt_conn comms_manager webserver ota_handler mdns wifi_hotspot
-    pump_monitor
+    pump_monitor pump_control_unit
 )
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
