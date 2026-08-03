@@ -14,6 +14,12 @@ TankStateMachineState level_analytics_from_top(
     int32_t container_height_mm) noexcept
 {
     uint32_t sum = 0;
+
+    if (samples.empty()) {
+        ESP_LOGW(kAnalyticsTag, "Empty samples — Invalid State");
+        return TankStateMachineState::InvalidState;
+    }
+    
     for (uint16_t v : samples) {
         sum += v;
     }

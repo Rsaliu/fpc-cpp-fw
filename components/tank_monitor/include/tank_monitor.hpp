@@ -83,7 +83,6 @@ struct TankMonitorConfig {
     LevelReadCallback      level_read_cb;         ///< std::function<Result<uint16_t>()>
     int32_t                number_of_samples{1};  ///< 1 .. TankMonitor::kMaxSamples
     LevelAnalyticsCallback analytics_cb;
-    LevelAnalyticsCallback analytics_ft;
 };
 
 // ─── Monitor state ────────────────────────────────────────────────────────────

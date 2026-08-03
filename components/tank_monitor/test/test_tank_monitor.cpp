@@ -64,7 +64,7 @@ static fpc::TankMonitorConfig make_config(
 
 TEST_CASE("basic_decision: normal range", "[tank_monitor]")
 {
-    const uint16_t samples[] = {500, 600, 550};
+    const uint16_t samples[] = {500, 600, 550}; // average = 550
     auto state = fpc::level_analytics_basic_decision(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Normal, state);
@@ -72,7 +72,7 @@ TEST_CASE("basic_decision: normal range", "[tank_monitor]")
 
 TEST_CASE("basic_decision: at full level → Full", "[tank_monitor]")
 {
-    const uint16_t samples[] = {900, 910, 920};
+    const uint16_t samples[] = {900, 910, 920}; // average = 910
     auto state = fpc::level_analytics_basic_decision(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Full, state);
@@ -80,7 +80,7 @@ TEST_CASE("basic_decision: at full level → Full", "[tank_monitor]")
 
 TEST_CASE("basic_decision: at low level → Low", "[tank_monitor]")
 {
-    const uint16_t samples[] = {100, 80, 60};
+    const uint16_t samples[] = {100, 80, 60}; // average = 80
     auto state = fpc::level_analytics_basic_decision(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Low, state);
@@ -95,28 +95,28 @@ TEST_CASE("basic_decision: empty span → InvalidState", "[tank_monitor]")
 
 // ----------- Level_analytics_from_top---------------------------------
 TEST_CASE("from_top: normal range", "[tank_monitor]"){
-    const uint16_t samples[] = {500, 600, 550};
+    const uint16_t samples[] = {500, 600, 550}; // average = 550
     auto state = fpc::level_analytics_from_top(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Normal, state);
 }
 
 TEST_CASE("from_top: at full level", "[tank_monitor]"){
-    const uint16_t samples[] = {100, 90, 80};
+    const uint16_t samples[] = {100, 90, 80}; // average = 90
     auto state = fpc::level_analytics_from_top(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Full, state);
 }
 
 TEST_CASE("from_top: at low level", "[tank_monitor]"){
-    const uint16_t samples[] = {900, 950, 920};
+    const uint16_t samples[] = {900, 950, 920}; // average = 923.33
     auto state = fpc::level_analytics_from_top(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Low, state);
 }
 
 TEST_CASE("from_top: at invlid state", "[tank_monitor]"){
-    const uint16_t samples[] = {1050, 1100, 1300};
+    const uint16_t samples[] = {1050, 1100, 1300}; // average = 1150
     auto state = fpc::level_analytics_from_top(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::InvalidState, state);
