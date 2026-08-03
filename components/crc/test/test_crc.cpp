@@ -61,7 +61,7 @@ TEST_CASE("crc16_modbus: single byte 0x01", "[crc]")
 {
     constexpr std::array<uint8_t, 1> data = {0x01u};
     const uint16_t crc = crc::crc16_modbus(ByteView{data.data(), data.size()});
-    TEST_ASSERT_EQUAL_HEX16(0x40BFu, crc);
+    TEST_ASSERT_EQUAL_HEX16(0x807Eu, crc);
 }
 
 TEST_CASE("crc16_modbus: single byte 0x00", "[crc]")
