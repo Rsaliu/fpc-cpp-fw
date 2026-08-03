@@ -17,20 +17,24 @@ TankStateMachineState level_analytics_from_top(
     for (uint16_t v : samples) {
         sum += v;
     }
-   const int32_t avg = static_cast<int32_t>(sum / samples.size());
+    const int32_t avg = static_cast<int32_t>(sum / samples.size());
     
-    uint32_t fluid_level;
-    fluid_level = container_height_mm - avg;
+    if (avg > container_height_mm){
+        ESP_LOGE(kAnalyticsTag, "Error: Average is greater than container height");
+        return TankStateMachineState::InvalidState;
+    }
 
-    if(fluid_level >= container_height_mm){
+    uint32_t fluid_level = container_height_mm - avg;
+
+    if(fluid_level >= full_level_mm){
         ESP_LOGW(kAnalyticsTag, "The tank is already full, can't take more liquid");
         return TankStateMachineState::Full;
     }
-    if(avg < fluid_level){
+    if(fluid_level <= low_level_mm){
         ESP_LOGW(kAnalyticsTag, "The tank is low");
         return TankStateMachineState::Low;
     }
-    ESP_LOGW(kAnalyticsTag, "The liquid is yet to full; has %lu to full", avg);
+    ESP_LOGW(kAnalyticsTag, "The liquid is yet to full; has %lu mm to full", avg);
     return TankStateMachineState::Normal;
 }
 

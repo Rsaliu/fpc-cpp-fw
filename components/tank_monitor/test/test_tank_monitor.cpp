@@ -31,31 +31,6 @@ static fpc::TankMonitorConfig make_config(
         return fpc::Result<uint16_t>::ok(mock_level);
     };
 
-    cfg.analytics_ft = [&analytics_state](
-        fpc::Span<const uint16_t> samples,
-        int32_t full_mm,
-        int32_t low_mm,
-        int32_t container_height_mm) -> fpc::TankStateMachineState
-    {
-        int32_t sum = 0;
-        for (uint16_t v : samples) { sum += v; }
-        const int32_t avg = sum / static_cast<int32_t>(samples.size());
-
-        uint32_t fluid_level = container_height_mm - avg;
-        fpc::TankStateMachineState s;
-
-         if(fluid_level >= container_height_mm){
-            s = fpc::TankStateMachineState::Full;
-        }else if(avg < fluid_level){
-            s = fpc::TankStateMachineState::Low;
-        }else {
-            s = fpc::TankStateMachineState::Normal;
-        }
-        analytics_state = s;
-        ESP_LOGI(TAG, "analytics_cb: avg=%d → state=%d", (int)avg, (int)s);
-        return s;
-    };
-
     cfg.analytics_cb = [&analytics_state](
         fpc::Span<const uint16_t> samples,
         int32_t full_mm,
@@ -127,19 +102,25 @@ TEST_CASE("from_top: normal range", "[tank_monitor]"){
 }
 
 TEST_CASE("from_top: at full level", "[tank_monitor]"){
-    const uint16_t samples[] = {1000, 1100, 1200};
+    const uint16_t samples[] = {100, 90, 80};
     auto state = fpc::level_analytics_from_top(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Full, state);
 }
 
 TEST_CASE("from_top: at low level", "[tank_monitor]"){
-    const uint16_t samples[] = {100, 300, 430};
+    const uint16_t samples[] = {900, 950, 920};
     auto state = fpc::level_analytics_from_top(
         fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
     TEST_ASSERT_EQUAL(fpc::TankStateMachineState::Low, state);
 }
 
+TEST_CASE("from_top: at invlid state", "[tank_monitor]"){
+    const uint16_t samples[] = {1050, 1100, 1300};
+    auto state = fpc::level_analytics_from_top(
+        fpc::Span<const uint16_t>{samples, 3}, 900, 100, 1000);
+    TEST_ASSERT_EQUAL(fpc::TankStateMachineState::InvalidState, state);
+}
 
 // ─── TankMonitor lifecycle ────────────────────────────────────────────────────
 
