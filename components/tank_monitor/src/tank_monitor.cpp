@@ -69,12 +69,14 @@ Result<void> TankMonitor::check_level()
 
     const int32_t full_mm = config_.tank_config.full_level_mm;
     const int32_t low_mm  = config_.tank_config.low_level_mm;
+    const int32_t container_height_mm = config_.tank_config.container_height_mm;
     const auto    prev    = sm_state_;
 
     sm_state_ = config_.analytics_cb(
         Span<const uint16_t>{samples_, static_cast<size_t>(config_.number_of_samples)},
         full_mm,
-        low_mm);
+        low_mm,
+        container_height_mm);
     
     if (sm_state_ == TankStateMachineState::InvalidState){
         return Result<void>::err(SystemError::InvalidState);
