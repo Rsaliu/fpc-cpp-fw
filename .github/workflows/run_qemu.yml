@@ -60,7 +60,8 @@ jobs:
             pytest-embedded-idf \
             pytest-embedded-serial \
             pytest-embedded-serial-esp \
-            pytest-embedded-qemu
+            pytest-embedded-qemu \
+            pytest-rerunfailures
 
       - name: Configure ESP32 target
         shell: bash
@@ -86,6 +87,8 @@ jobs:
           pytest pytest_unity.py \
             -v \
             -s \
+            --reruns 1 \
+            --reruns-delay 5 \
             --embedded-services=idf,qemu \
             --target=esp32s3 \
             --app-path=./unity-app \
