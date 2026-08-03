@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pump User Registration</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <div class="header">
+    <img src="botsgeek.PNG" alt="Botsgeek Logo" width="50" height="50">
+    <h1>Botsgeek FPC Register</h1>
+  </div>
+
+  <div class="container">
+    <div class="form">
+      <form id="registerForm">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" maxlength="32" autocomplete="on"><br><br>
+        <label for="pwd1">Password:</label><br>
+        <input type="password" id="pwd1" name="pwd1" minlength="8" maxlength="32"><br><br>
+        <label for="pwd2">Confirm Password:</label><br>
+        <input type="password" id="pwd2" name="pwd2" minlength="8" maxlength="32"><br><br>
+        <button onclick="register(event)">Register</button>
+      </form>
+    </div>
+  </div>
+  <script src="register_ui.js"></script>
+</body>
+</html>

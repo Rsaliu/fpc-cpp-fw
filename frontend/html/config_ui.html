@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pump Configuration</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+<body>
+
+  <div class="header">
+    <img src="botsgeek.png" alt="Botsgeek Logo" width="50" height="50">
+    <h1>Botsgeek FPC Configuration</h1>
+  </div>
+
+  <div class="container">
+    <div>
+      <label for="configInput">Paste JSON Configuration:</label>
+      <textarea id="configInput" placeholder='{"key": "value"}'></textarea>
+    </div>
+   
+    <div class="button-group">
+      <button onclick="loadConfig()">Load Configuration</button>
+      <button onclick="saveConfig()">Save Configuration</button>
+    </div>
+    <div id="status"></div>
+  </div>
+  <script src="config_ui.js"></script>
+</body>
+</html>

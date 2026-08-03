@@ -11,6 +11,7 @@
 
 #include <string>
 #include <cstddef>
+#include <functional>
 #include "common.hpp"
 #include "esp_http_server.h"
 
@@ -59,6 +60,9 @@ public:
     [[nodiscard]] virtual httpd_handle_t    get_handle()  const noexcept = 0;
     [[nodiscard]] virtual WebserverContext* get_context() const noexcept = 0;
 };
+
+/// Callback invoked after the server starts to register HTTP routes.
+using WebserverSetupFn = std::function<Result<void>(IWebServer&)>;
 
 // ─── Concrete implementation ──────────────────────────────────────────────────
 

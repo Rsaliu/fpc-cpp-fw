@@ -3,12 +3,35 @@
 #include "esp_log.h"
 #include "esp_http_server.h"
 #include "esp_spiffs.h"
+#include "esp_wifi.h"
+#include "mdns.h"
+#include "lwip/apps/netbiosns.h"
 
 static const char* TAG = "WEBSERVER";
 static constexpr int RESERVED_SOCKETS = 3;
 static constexpr int MAX_URI_HANDLERS = 20;
 
 namespace fpc {
+
+namespace {
+
+/// Initialise mDNS with an HTTP service advertisement.
+Result<void> init_mdns(const WebserverConfig& cfg)
+{
+    if (mdns_init() != ESP_OK)                                { return Result<void>::err(SystemError::OperationFailed); }
+    if (mdns_hostname_set(cfg.mdns_hostname.c_str()) != ESP_OK) { return Result<void>::err(SystemError::OperationFailed); }
+    if (mdns_instance_name_set(cfg.mdns_instance.c_str()) != ESP_OK) { return Result<void>::err(SystemError::OperationFailed); }
+
+    mdns_txt_item_t txt[] = { {"board", "esp32"}, {"path", "/"} };
+    if (mdns_service_add("ESP32-WebServer", "_http", "_tcp",
+                         static_cast<uint16_t>(cfg.port), txt,
+                         sizeof(txt) / sizeof(txt[0])) != ESP_OK) {
+        return Result<void>::err(SystemError::OperationFailed);
+    }
+    return Result<void>::ok();
+}
+
+} // namespace
 
 Webserver::Webserver(WebserverConfig config)
     : config_{std::move(config)}
@@ -32,6 +55,29 @@ Result<void> Webserver::init()
     std::strncpy(context_.config_file_path,
                  config_.config_file_path.c_str(), kWebserverMaxPathLen);
 
+    // mDNS + NetBIOS advertisement (parity with reference webserver_init).
+    if (!config_.mdns_hostname.empty() && !config_.mdns_instance.empty()) {
+        if (init_mdns(config_).is_err()) {
+            ESP_LOGE(TAG, "mDNS init failed");
+            return Result<void>::err(SystemError::OperationFailed);
+        }
+        netbiosns_init();
+        netbiosns_set_name(config_.mdns_hostname.c_str());
+
+        // The webserver must run while the SoftAP is up.
+        wifi_mode_t mode{};
+        if (esp_wifi_get_mode(&mode) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to get WiFi mode");
+            mdns_free(); netbiosns_stop();
+            return Result<void>::err(SystemError::OperationFailed);
+        }
+        if (mode != WIFI_MODE_AP && mode != WIFI_MODE_APSTA) {
+            ESP_LOGE(TAG, "WiFi mode must be AP or APSTA for web server");
+            mdns_free(); netbiosns_stop();
+            return Result<void>::err(SystemError::InvalidMode);
+        }
+    }
+
     if (!config_.web_partition_label.empty() && !config_.web_mount_point.empty()) {
         esp_vfs_spiffs_conf_t spiffs_cfg{};
         spiffs_cfg.base_path              = config_.web_mount_point.c_str();
@@ -40,6 +86,7 @@ Result<void> Webserver::init()
         spiffs_cfg.format_if_mount_failed = true;
         if (esp_vfs_spiffs_register(&spiffs_cfg) != ESP_OK) {
             ESP_LOGE(TAG, "SPIFFS mount failed");
+            mdns_free(); netbiosns_stop();
             return Result<void>::err(SystemError::Failed);
         }
     }
@@ -86,6 +133,10 @@ Result<void> Webserver::deinit()
     if (state_ == State::Running) (void)stop();
     if (!config_.web_partition_label.empty())
         esp_vfs_spiffs_unregister(config_.web_partition_label.c_str());
+    if (!config_.mdns_hostname.empty() && !config_.mdns_instance.empty()) {
+        mdns_free();
+        netbiosns_stop();
+    }
     state_ = State::Uninitialized;
     return Result<void>::ok();
 }
