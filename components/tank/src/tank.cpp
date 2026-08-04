@@ -28,7 +28,7 @@ Result<void> Tank::init()
 {
     if (m_config.id < 0 ||
         m_config.capacity_litres <= 0.0f ||
-        m_config.height_cm <= 0.0f ||
+        m_config.height_mm <= 0.0f ||
         m_config.full_level_mm < 0 ||
         m_config.low_level_mm  < 0 ||
         m_config.full_level_mm <= m_config.low_level_mm)
@@ -87,13 +87,13 @@ std::string Tank::format_info() const
     std::snprintf(buf.data(), buf.size(),
         "Tank ID: %ld\n"
         " Capacity: %.2f liters\n"
-        " Height: %.2f cm\n"
-        " Low Level: %ld mm\n"
-        " High Level: %ld mm\n"
+        " Height: %.2f mm\n"
+        " Low Level: %.2ld mm\n"
+        " High Level: %.2ld mm\n"
         " Shape: %s\n",
         m_config.id,
         m_config.capacity_litres,
-        m_config.height_cm,
+        m_config.height_mm,
         m_config.low_level_mm,
         m_config.full_level_mm,
         to_string(m_config.shape).data());
