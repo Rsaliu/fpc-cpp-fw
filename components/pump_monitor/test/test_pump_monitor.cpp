@@ -1,6 +1,7 @@
 #include "unity.h"
 #include "pump_monitor.hpp"
 #include "esp_log.h"
+#include <algorithm>
 
 static const char* TAG = "test_pump_monitor";
 
@@ -81,6 +82,44 @@ TEST_CASE("basic_decision: empty span returns Undercurrent", "[pump_monitor]")
     auto state = fpc::current_analytics_basic_decision(
         fpc::Span<const float>{}, 6.0f, 0.5f);
     TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Undercurrent, state);
+}
+
+// ─── current_analytics_capacity_decision ────────────────────────────────────────
+
+TEST_CASE("capacity_decision: empty rated_current returns Invalid", "[pump_monitor]")
+{
+    const float samples[] = {3.0f, 2.5f, 3.5f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 3}, 0.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
+}
+
+TEST_CASE("capacity_decision: empty span returns Undercurrent", "[pump_monitor]")
+{
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Undercurrent, state);
+}
+
+TEST_CASE("capacity_decision: overcurrent", "[pump_monitor]")
+{
+    const float samples[] = {7.0f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 1}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
+}
+    
+TEST_CASE("capacity_decision: Sort returns sorted samples in descending order", "[pump_monitor]")
+{
+    const float samples[] = {2.0, 5.0, 1.0, 8.0};
+    std::vector<float> sorted(samples, samples + 4);
+
+    std::sort(sorted.begin(), sorted.end(), std::greater<float>());
+
+    TEST_ASSERT_EQUAL_FLOAT(8.0, sorted[0]);
+    TEST_ASSERT_EQUAL_FLOAT(5.0, sorted[1]);
+    TEST_ASSERT_EQUAL_FLOAT(2.0, sorted[2]);
+    TEST_ASSERT_EQUAL_FLOAT(1.0, sorted[3]);
 }
 
 // ─── PumpMonitor lifecycle ────────────────────────────────────────────────────
