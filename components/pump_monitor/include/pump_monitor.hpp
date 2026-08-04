@@ -15,6 +15,7 @@ enum class PumpStateMachineState : uint8_t {
     Normal       = 0,
     Undercurrent = 1,
     Overcurrent  = 2,
+    Invalid     = 3,  ///< Used to indicate an error in the rated current reading or other unexpected condition.
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
@@ -27,6 +28,11 @@ using AnalyticsCallback = std::function<
 /// Built-in average-based decision function.  Usable directly as an
 /// AnalyticsCallback or in tests.
 [[nodiscard]] PumpStateMachineState current_analytics_basic_decision(
+    Span<const float> samples,
+    float rated_current,
+    float min_working_current) noexcept;
+
+[[nodiscard]] PumpStateMachineState current_analytics_capacity_decision(
     Span<const float> samples,
     float rated_current,
     float min_working_current) noexcept;
