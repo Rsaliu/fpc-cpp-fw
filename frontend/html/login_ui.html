@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pump User Login</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <div class="header">
+    <img src="botsgeek.png" alt="Botsgeek Logo" width="50" height="50">
+    <h1>Botsgeek FPC Login</h1>
+  </div>
+
+  <div class="container">
+    <div class="form">
+      <form id="loginForm">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" maxlength="32" autocomplete="on"><br><br>
+        <label for="pwd">Password:</label><br>
+        <input type="password" id="pwd" name="pwd" minlength="8" maxlength="32"><br><br>
+        <button onclick="login(event)">Login</button>
+      </form>
+    </div>
+  </div>
+  <script src="login_ui.js"></script>
+</body>
+</html>

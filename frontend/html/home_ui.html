@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Botsgeek FPC Home</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <div class="header">
+    <img src="botsgeek.png" alt="Botsgeek Logo" width="50" height="50">
+    <h1>Botsgeek FPC</h1>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tablinks" id="loginTabLink" onclick="redirectTo('login_ui.html')">Login</button>
+    <button class="tablinks" id="registerTabLink" onclick="redirectTo('register_ui.html')">Register</button>
+    <button class="tablinks" id="configTabLink" onclick="redirectTo('config_ui.html')" style="display: none;">Config</button>
+    <button class="tablinks" id="homeTabLink" onclick="redirectTo('../html/home_ui.html')" style="display: none;">Home</button> 
+      <button class="tablinks logout-btn" id="logoutTabLink" onclick="logout()" style="display: none;">Logout</button>
+  </div>
+
+  <div class="container">
+    <div class="welcome">
+      <h2>Welcome to Botsgeek FPC</h2>
+      <p>
+        Welcome to the Botsgeek Fluid Pump Controller (FPC) platform. 
+        Please use the tabs above to log in, register for a new account, 
+        or configure your pump settings. To access configuration options, 
+        you must be logged in.
+      </p>
+    </div>
+  </div>
+
+  <script src="home_ui.js"></script>
+</body>
+</html>

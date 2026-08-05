@@ -19,7 +19,7 @@
 
 namespace fpc {
 
-using WebserverSetupFn = std::function<Result<void>(IWebServer&)>;
+// WebserverSetupFn is declared in webserver.hpp (included above).
 
 struct WebserverTaskConfig {
     WebserverConfig  webserver_config{};

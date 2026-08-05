@@ -1,0 +1,15 @@
+menu "Webserver Options"
+
+config MAX_USERNAME_LENGTH
+    int "Max Username Length"
+    default 32
+    help
+        Set the maximum length for usernames used in the webserver authentication.
+
+config MAX_PASSWORD_LENGTH
+    int "Max Password Length"
+    default 32
+    help
+        Set the maximum length for passwords used in the webserver authentication.
+
+endmenu
