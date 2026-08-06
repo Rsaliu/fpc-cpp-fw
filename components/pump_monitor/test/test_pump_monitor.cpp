@@ -77,16 +77,16 @@ TEST_CASE("basic_decision: overcurrent", "[pump_monitor]")
     TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
 }
 
-TEST_CASE("basic_decision: empty span returns Undercurrent", "[pump_monitor]")
+TEST_CASE("basic_decision: empty span returns Invalid", "[pump_monitor]")
 {
     auto state = fpc::current_analytics_basic_decision(
         fpc::Span<const float>{}, 6.0f, 0.5f);
-    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Undercurrent, state);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
 }
 
 // ─── current_analytics_capacity_decision ────────────────────────────────────────
 
-TEST_CASE("capacity_decision: empty rated_current returns Invalid", "[pump_monitor]")
+TEST_CASE("capacity_decision: 0 rated_current returns Invalid", "[pump_monitor]")
 {
     const float samples[] = {3.0f, 2.5f, 3.5f};
     auto state = fpc::current_analytics_capacity_decision(
@@ -94,11 +94,11 @@ TEST_CASE("capacity_decision: empty rated_current returns Invalid", "[pump_monit
     TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
 }
 
-TEST_CASE("capacity_decision: empty span returns Undercurrent", "[pump_monitor]")
+TEST_CASE("capacity_decision: empty span returns Invalid", "[pump_monitor]")
 {
     auto state = fpc::current_analytics_capacity_decision(
         fpc::Span<const float>{}, 6.0f, 0.5f);
-    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Undercurrent, state);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
 }
 
 TEST_CASE("capacity_decision: overcurrent", "[pump_monitor]")
@@ -108,18 +108,21 @@ TEST_CASE("capacity_decision: overcurrent", "[pump_monitor]")
         fpc::Span<const float>{samples, 1}, 6.0f, 0.5f);
     TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
 }
-    
-TEST_CASE("capacity_decision: Sort returns sorted samples in descending order", "[pump_monitor]")
+
+TEST_CASE("capacity_decision: average of 3 largest samples", "[pump_monitor]")
 {
-    const float samples[] = {2.0, 5.0, 1.0, 8.0};
-    std::vector<float> sorted(samples, samples + 4);
+    const float samples[] = {2.0f, 5.0f, 1.0f, 8.0f, 10.0f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 5}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
+}
 
-    std::sort(sorted.begin(), sorted.end(), std::greater<float>());
-
-    TEST_ASSERT_EQUAL_FLOAT(8.0, sorted[0]);
-    TEST_ASSERT_EQUAL_FLOAT(5.0, sorted[1]);
-    TEST_ASSERT_EQUAL_FLOAT(2.0, sorted[2]);
-    TEST_ASSERT_EQUAL_FLOAT(1.0, sorted[3]);
+TEST_CASE("capacity_decision: average of 2 largest samples when only 2 samples", "[pump_monitor]")
+{
+    const float samples[] = {2.0f, 5.0f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 2}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Normal, state);
 }
 
 // ─── PumpMonitor lifecycle ────────────────────────────────────────────────────
