@@ -7,7 +7,7 @@ namespace fpc {
 
 static const char* kAnalyticsTag = "current_analytics";
 
-constexpr float percentage = 0.8;
+constexpr float percentage = 0.8f;
 
 PumpStateMachineState current_analytics_capacity_decision(
     Span<const float> samples,
@@ -21,7 +21,8 @@ PumpStateMachineState current_analytics_capacity_decision(
     }
 
     if (samples.empty()) {
-        return PumpStateMachineState::Undercurrent;
+        ESP_LOGE(kAnalyticsTag, "Samples cannot be empty");
+        return PumpStateMachineState::Invalid;
     }
 
     std::vector<float> sorted;
@@ -63,7 +64,8 @@ PumpStateMachineState current_analytics_basic_decision(
     float min_working_current) noexcept
 {
     if (samples.empty()) {
-        return PumpStateMachineState::Undercurrent;
+        ESP_LOGE(kAnalyticsTag, "Samples cannot be empty");
+        return PumpStateMachineState::Invalid;
     }
 
     float sum = 0.0f;

@@ -1,6 +1,7 @@
 #include "unity.h"
 #include "pump_monitor.hpp"
 #include "esp_log.h"
+#include <algorithm>
 
 static const char* TAG = "test_pump_monitor";
 
@@ -76,11 +77,52 @@ TEST_CASE("basic_decision: overcurrent", "[pump_monitor]")
     TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
 }
 
-TEST_CASE("basic_decision: empty span returns Undercurrent", "[pump_monitor]")
+TEST_CASE("basic_decision: empty span returns Invalid", "[pump_monitor]")
 {
     auto state = fpc::current_analytics_basic_decision(
         fpc::Span<const float>{}, 6.0f, 0.5f);
-    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Undercurrent, state);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
+}
+
+// ─── current_analytics_capacity_decision ────────────────────────────────────────
+
+TEST_CASE("capacity_decision: 0 rated_current returns Invalid", "[pump_monitor]")
+{
+    const float samples[] = {3.0f, 2.5f, 3.5f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 3}, 0.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
+}
+
+TEST_CASE("capacity_decision: empty span returns Invalid", "[pump_monitor]")
+{
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Invalid, state);
+}
+
+TEST_CASE("capacity_decision: overcurrent", "[pump_monitor]")
+{
+    const float samples[] = {7.0f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 1}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
+}
+
+TEST_CASE("capacity_decision: average of 3 largest samples", "[pump_monitor]")
+{
+    const float samples[] = {2.0f, 5.0f, 1.0f, 8.0f, 10.0f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 5}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
+}
+
+TEST_CASE("capacity_decision: average of 2 largest samples when only 2 samples", "[pump_monitor]")
+{
+    const float samples[] = {2.0f, 5.0f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 2}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Normal, state);
 }
 
 // ─── PumpMonitor lifecycle ────────────────────────────────────────────────────
