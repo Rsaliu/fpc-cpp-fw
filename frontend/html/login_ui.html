@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pump User Login</title>
   <link rel="stylesheet" href="ui.css" />
 </head>
+
 <body>
   <div class="header">
     <img src="botsgeek.png" alt="Botsgeek Logo" width="50" height="50">
@@ -13,6 +15,10 @@
   </div>
 
   <div class="container">
+    <div class="container_button">
+      <button class="tablinks" id="homeTabLink" onclick="redirectTo('home_ui.html')">Home</button>
+      <button class="tablinks" id="registerTabLink" onclick="redirectTo('register_ui.html')">Register</button>
+      </div>
     <div class="form">
       <form id="loginForm">
         <label for="username">Username:</label><br>
@@ -25,4 +31,5 @@
   </div>
   <script src="login_ui.js"></script>
 </body>
+
 </html>

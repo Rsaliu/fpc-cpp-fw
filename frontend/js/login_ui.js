@@ -1,3 +1,7 @@
+function redirectTo(url) {
+  window.location.href = url;
+}
+
 function login(event) {
   event.preventDefault();
   const form = document.getElementById("loginForm");
