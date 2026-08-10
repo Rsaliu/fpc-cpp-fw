@@ -1,4 +1,7 @@
+function redirectTo(page) {
 
+  window.location.href = page;
+}
 
 function register(event) {
   event.preventDefault();
