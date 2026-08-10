@@ -29,7 +29,7 @@ static constexpr const char* kRegisteredUserKey = "registered_user";
 static constexpr std::size_t kUsernameMax       = 32U;
 static constexpr std::size_t kSaltLen           = 16U;
 static constexpr std::size_t kHashLen           = 32U;
-static constexpr uint32_t    kPbkdf2Iters       = 100000U;
+static constexpr uint32_t    kPbkdf2Iters       = 10000U;
 static constexpr uint8_t     kRegisteredFlag    = 0x69U;
 
 /// Packed on-flash credential record.
