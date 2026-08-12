@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: fpc-cpp Pump Controller API
+  description: >
+    REST API served by the on-device HTTP server (ESP32-S3).
+    Authentication uses a session cookie (SID) obtained via POST /login.
+    To test against a live device, set the server URL below to the device IP.
+  version: 1.0.0
+
+servers:
+  - url: http://{deviceIp}
+    description: Live device
+    variables:
+      deviceIp:
+        default: 192.168.4.1
+        description: IP address of the ESP32 (default is the hotspot AP address)
+
+tags:
+  - name: auth
+    description: Registration, login and session management
+  - name: config
+    description: Device configuration (auth required)
+  - name: static
+    description: Frontend static assets
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: SID
+      description: Session cookie set by POST /login.
+  schemas:
+    Credentials:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          maxLength: 32
+          example: admin
+        password:
+          type: string
+          maxLength: 32
+          format: password
+          example: secret123
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: OK
+    Config:
+      type: object
+      description: Device configuration document (free-form JSON persisted to SPIFFS).
+      additionalProperties: true
+
+paths:
+  /login:
+    post:
+      tags: [auth]
+      summary: Authenticate and open a session
+      description: >
+        Validates credentials against the NVS-backed credential store.
+        On success a SID cookie is set. If the user is already logged in,
+        200 is returned without creating a new session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: Login OK — SID cookie set (or already logged in)
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: SID=abcdef123456; Path=/
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid JSON or field length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: Internal error (context missing, body retrieval or session creation failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /register:
+    post:
+      tags: [auth]
+      summary: Register the device user credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid JSON or field length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /logout:
+    get:
+      tags: [auth]
+      summary: Close the current session
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Logged out — session removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /reset:
+    get:
+      tags: [auth]
+      summary: Factory-reset stored credentials
+      responses:
+        '200':
+          description: Credentials cleared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /config:
+    get:
+      tags: [config]
+      summary: Read the device configuration
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Current configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: Internal error (missing paths or file I/O failure)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+    post:
+      tags: [config]
+      summary: Persist a new device configuration
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Config'
+      responses:
+        '200':
+          description: Configuration saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /{path}:
+    get:
+      tags: [static]
+      summary: Serve frontend static files (catch-all)
+      description: >
+        Any GET not matching a REST route is handled by the static file
+        handler, serving assets from the SPIFFS frontend partition.
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+          example: index.html
+      responses:
+        '200':
+          description: File content (Content-Type inferred from extension)
+        '404':
+          description: File not found

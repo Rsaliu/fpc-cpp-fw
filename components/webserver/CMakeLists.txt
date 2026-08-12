@@ -11,6 +11,7 @@ idf_component_register(
          "src/config_handler.cpp"
          "src/frontend_pages_handler.cpp"
          "src/webserver_routes.cpp"
+         "src/route_registry.cpp"
     INCLUDE_DIRS "include"
     REQUIRES common esp_http_server spiffs nvs_flash esp_wifi mdns
              nlohmann_json mbedtls esp_timer
