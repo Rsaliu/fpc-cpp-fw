@@ -107,6 +107,10 @@ Result<void> Webserver::start()
     httpd_cfg.max_uri_handlers = static_cast<uint16_t>(MAX_URI_HANDLERS);
     httpd_cfg.uri_match_fn     = httpd_uri_match_wildcard;
 
+    // nlohmann::json parsing in the handlers needs far more than the 4 KB
+    // default httpd stack — otherwise the stack canary trips inside parse().
+    httpd_cfg.stack_size       = 12288;
+
     if (httpd_start(&server_, &httpd_cfg) != ESP_OK) {
         ESP_LOGE(TAG, "httpd_start failed");
         return Result<void>::err(SystemError::Failed);
