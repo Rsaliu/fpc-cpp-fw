@@ -11,12 +11,11 @@
     <img src="botsgeek.png" alt="Botsgeek Logo" width="50" height="50">
     <h1>Botsgeek FPC Login</h1>
   </div>
-
+    <div class="tab-bar">
+    <button class="tablinks" id="homeTabLink" onclick="redirectTo('home_ui.html')">Home</button>
+    <button class="tablinks" id="registerTabLink" onclick="redirectTo('register_ui.html')">Register</button>
+  </div>
   <div class="container">
-    <div class="container_button"></div>
-      <button onclick="redirectTo('home_ui.html')">Home</button>
-      <button onclick="redirectTo('login_ui.html')">Login</button>
-    </div>
     <div class="form">
       <form id="loginForm">
         <label for="username">Username:</label><br>
