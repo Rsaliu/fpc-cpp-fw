@@ -1,3 +1,12 @@
+import { isLoggedIn, redirectTo } from './utils.js';
+import { logout,updateUI, API_URL,loadComponent } from './common.js';
+import { configPageStateMachine } from './state_manager.js';
+import { initTabbar } from './tab-bar.js';
+window.redirectTo = redirectTo; // Expose redirectTo to the global scope
+window.logout = logout; // Expose logout to the global scope
+
+const CONFIG_URL = `${API_URL}/config`;
+
 function loadConfig() {
   if (localStorage.getItem("isLoggedIn") !== "true") {
     alert("Please log in to access configuration.");
@@ -5,7 +14,7 @@ function loadConfig() {
     return;
   }
 
-  fetch("http://fpc-webserver.local/config", {
+  fetch(CONFIG_URL, {
     method: "GET",
     headers: {
       "Content-Type": "application/json"
@@ -31,7 +40,7 @@ function loadConfig() {
     if(error.status === 401) {
       localStorage.removeItem("isLoggedIn");
       document.getElementById("status").textContent = "Unauthorized access. Please log in.";
-      window.location.href = "login_ui.html";
+      redirectTo("login_ui.html");
       return;
     }
     document.getElementById("status").textContent = `Error loading configuration: ${error.message}`;
@@ -39,9 +48,9 @@ function loadConfig() {
 }
 
 function saveConfig() {
-  if (localStorage.getItem("isLoggedIn") !== "true") {
+  if (isLoggedIn() !== true) {
     alert("Please log in to access configuration.");
-    window.location.href = "login_ui.html";
+    redirectTo("login_ui.html");
     return;
   }
 
@@ -54,7 +63,7 @@ function saveConfig() {
     return;
   }
 
-  fetch("http://fpc-webserver.local/config", {
+  fetch(CONFIG_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -85,3 +94,10 @@ function saveConfig() {
   });
 }
 
+// Initialize the UI after DOM is ready. Load tab-bar first so its
+// elements (tab links) are present before updating visibility.
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadComponent("tab-bar", "../html/tab-bar.html");
+  await initTabbar();
+  updateUI(configPageStateMachine);
+});
