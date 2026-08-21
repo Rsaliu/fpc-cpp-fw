@@ -97,7 +97,7 @@ function saveConfig() {
 // Initialize the UI after DOM is ready. Load tab-bar first so its
 // elements (tab links) are present before updating visibility.
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadComponent("tab-bar", "../html/tab-bar.html");
+  await loadComponent("tab-bar", "tab-bar.html");
   await initTabbar();
   updateUI(configPageStateMachine);
 });
