@@ -1,7 +1,11 @@
-function redirectTo(page) {
+import { isLoggedIn,redirectTo } from './utils.js';
+import { logout,updateUI,API_URL,loadComponent } from './common.js';
+import { registerPageStateMachine } from './state_manager.js';
+import { initTabbar } from './tab-bar.js';
+window.redirectTo = redirectTo; // Expose redirectTo to the global scope
+window.logout = logout; // Expose logout to the global scope
 
-  window.location.href = page;
-}
+const REGISTER_URL = `${API_URL}/register`;
 
 function register(event) {
   event.preventDefault();
@@ -18,7 +22,7 @@ function register(event) {
     return;
   }
   console.log("will send data, passwords match");
-  fetch("http://fpc-webserver.local/register", {
+  fetch(REGISTER_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -40,3 +44,11 @@ function register(event) {
     alert("Registration failed!");
   });
 }
+
+// Initialize the UI after DOM is ready. Load tab-bar first so its
+// elements (tab links) are present before updating visibility.
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadComponent("tab-bar", "../html/tab-bar.html");
+  await initTabbar();
+  updateUI(registerPageStateMachine);
+});
