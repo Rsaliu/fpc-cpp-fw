@@ -6,11 +6,12 @@
  */
 
 #include "webserver_handlers.hpp"
-
 #include <cstdio>
 #include <cstring>
 #include "esp_log.h"
 #include "webserver_utils.hpp"
+#include "esp_netif.h"
+#include <sstream>
 
 namespace fpc {
 
@@ -98,7 +99,24 @@ esp_err_t rest_common_get_handler(httpd_req_t* req)
 
 esp_err_t cors_preflight_handler(httpd_req_t* req)
 {
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    #ifdef SWAGGER_CORS
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        #else
+        auto* hc = static_cast<HandlerContext*>(req->user_ctx);
+        if (hc == nullptr || hc->ctx == nullptr) {
+            ESP_LOGE(TAG,"Missing user context");
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "handler context missing");
+            return ESP_FAIL;
+        }
+        auto* server_url = hc->ctx->server_url;
+        if(!server_url) {
+            ESP_LOGE(TAG,"Server URL is empty");
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Server URL is null");
+            return ESP_FAIL;
+        }
+    ESP_LOGI(TAG, "the server URL for CORS is: %s",server_url);
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", server_url);
+    #endif
     httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type, Authorization");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Credentials", "true");

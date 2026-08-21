@@ -3,19 +3,21 @@
  * @brief Implementation of webserver helper functions (port of webserver_utils.c).
  */
 
-#include "webserver_utils.hpp"
-
+#include "handler_context.hpp"
+#include <webserver.hpp>
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <strings.h>
 #include "esp_log.h"
+#include "esp_netif.h"
 
 namespace fpc {
 
 static const char* TAG = "WEB_SERVER_UTILS";
 
 namespace {
+
 
 /// Case-insensitive check that @p filename ends with @p ext.
 bool has_extension(std::string_view filename, std::string_view ext)
@@ -55,11 +57,25 @@ Result<void> retrieve_request_body(httpd_req_t* req, char* buffer, std::size_t b
 
 void inject_cors(httpd_req_t* req)
 {
-    if (req == nullptr) {
-        ESP_LOGE(TAG, "Received null request");
-        return;
-    }
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+
+    #ifdef SWAGGER_CORS
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    #else
+        auto* hc = static_cast<HandlerContext*>(req->user_ctx);
+        if (hc == nullptr || hc->ctx == nullptr) {
+            ESP_LOGE(TAG, "Handler context is missing");
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "handler context missing");
+            return;
+        }
+        auto* server_url = hc->ctx->server_url;
+        if(!server_url) {
+            ESP_LOGE(TAG, "Server URL is null");
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Server URL is null");
+            return;
+        }
+        ESP_LOGI(TAG, "the server URL for CORS is: %s",server_url);
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", server_url);
+    #endif
     httpd_resp_set_hdr(req, "Access-Control-Allow-Credentials", "true");
 }
 

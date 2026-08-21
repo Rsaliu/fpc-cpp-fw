@@ -6,6 +6,7 @@
 #include "esp_wifi.h"
 #include "mdns.h"
 #include "lwip/apps/netbiosns.h"
+#include <sstream>
 
 static const char* TAG = "WEBSERVER";
 static constexpr int RESERVED_SOCKETS = 3;
@@ -117,7 +118,37 @@ Result<void> Webserver::start()
     }
 
     state_ = State::Running;
+    esp_netif_ip_info_t ip_info{};
+
+    esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+
+    if (esp_netif_get_ip_info(netif, &ip_info) != ESP_OK) {
+        httpd_stop(server_);
+        server_ = nullptr;
+        ESP_LOGE(TAG, "Failed to get IP info");
+        return Result<void>::err(SystemError::Failed);
+    }
+    char ip_str[16];
+    if(!esp_ip4addr_ntoa(&ip_info.ip, ip_str, sizeof(ip_str))) {
+        httpd_stop(server_);
+        server_ = nullptr;
+        ESP_LOGE(TAG, "Failed to convert IP to string");
+        return Result<void>::err(SystemError::Failed);
+    }
+    std::stringstream ss;
+    ss << "http://" << ip_str;
+    const auto ss_length = ss.str().length();
+    if(ss_length >= sizeof(context_.server_url)) {
+        httpd_stop(server_);
+        server_ = nullptr;
+        ESP_LOGE(TAG, "Server URL length exceeds buffer size");
+        return Result<void>::err(SystemError::BufferOverflow);
+    }
+    std::strncpy(context_.server_url, ss.str().c_str(), sizeof(context_.server_url) - 1);
+    context_.server_url[ss_length] = '\0';
+    ESP_LOGI(TAG, "SERVER URL: %s", context_.server_url);
     ESP_LOGI(TAG, "Webserver started on port %d", config_.port);
+
     return Result<void>::ok();
 }
 
