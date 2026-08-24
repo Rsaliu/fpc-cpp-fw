@@ -3,6 +3,5 @@ export function isLoggedIn() {
 }  
 
 export function redirectTo(page) {
-
   window.location.href = page;
 }

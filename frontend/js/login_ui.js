@@ -14,7 +14,6 @@ function login(event) {
     username: form.username.value.trim(),
     password: form.pwd.value
   };
-
   fetch(LOGIN_URL, {
     method: "POST",
     headers: {
@@ -39,6 +38,7 @@ function login(event) {
     alert("Invalid Credentials!");
   });
 }
+window.login = login; // Expose login to the global scope for the inline onclick handler
 
 // Initialize the UI after DOM is ready. Load tab-bar first so its
 // elements (tab links) are present before updating visibility.
