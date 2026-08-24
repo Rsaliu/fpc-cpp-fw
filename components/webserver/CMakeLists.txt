@@ -18,6 +18,9 @@ idf_component_register(
     PRIV_REQUIRES esp_event
 )
 
+# only uncomment the line of code below when you want to test with swagger
+# target_compile_options(${COMPONENT_LIB} PRIVATE -DSWAGGER_CORS) 
+
 # Build & flash the SPIFFS image from the shared frontend assets.
 set(WEB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../frontend")
 if(EXISTS ${WEB_SRC_DIR})

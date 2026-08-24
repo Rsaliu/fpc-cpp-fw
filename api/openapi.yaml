@@ -1,8 +1,12 @@
 openapi: 3.0.3
 info:
   title: fpc-cpp Pump Controller API
-  description: >
-    REST API served by the on-device HTTP server (ESP32-S3).
+  description: |
+    > [!WARNING]
+    >
+    > NOTE: To test the endpoint with swagger ensure you uncomment the line that has DSWAGGER_CORS in the CMakeLists of Webserver 
+    >
+    > REST API served by the on-device HTTP server (ESP32-S3).
     Authentication uses a session cookie (SID) obtained via POST /login.
     To test against a live device, set the server URL below to the device IP.
   version: 1.0.0
