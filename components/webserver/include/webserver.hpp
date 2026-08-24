@@ -16,7 +16,8 @@
 #include "esp_http_server.h"
 
 namespace fpc {
-
+/// Maximum length of an URL string.
+static constexpr std::size_t kWebserverUrlLength = 100U; 
 /// Maximum path length used for WebserverContext fields (mirrors ESP_VFS_PATH_MAX).
 static constexpr std::size_t kWebserverMaxPathLen = 256U;
 /// Scratch-buffer size for HTTP handler bodies.
@@ -41,6 +42,7 @@ struct WebserverContext {
     char base_path[kWebserverMaxPathLen + 1];
     char scratch[kScratchBufSize];
     char config_file_path[kWebserverMaxPathLen + 1];
+    char server_url[kWebserverUrlLength];        ///< URL of the server.
 };
 
 // ─── Interface ────────────────────────────────────────────────────────────────
