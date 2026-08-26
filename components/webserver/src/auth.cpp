@@ -17,18 +17,29 @@ esp_err_t auth_gate(httpd_req_t* req, Session** session)
 {
     if (req == nullptr) { return ESP_ERR_INVALID_ARG; }
 
+    if (req->method == HTTP_OPTIONS) {
+        return ESP_OK;
+    }
+
     auto* hc = static_cast<HandlerContext*>(req->user_ctx);
     if (hc == nullptr || hc->sessions == nullptr) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "handler context missing");
         return ESP_FAIL;
     }
 
+    ESP_LOGI(TAG, "Beginning of the the cookie header");
     char cookie_hdr[128];
-    if (httpd_req_get_hdr_value_str(req, "Cookie", cookie_hdr, sizeof(cookie_hdr)) != ESP_OK) {
+    size_t cookie_size = sizeof(cookie_hdr);
+    ESP_LOGI(TAG, "Cookie header: %s", cookie_hdr);
+    ESP_LOGI(TAG, "Cookie size: %zu", cookie_size);
+        ESP_LOGI(TAG, "HTTP REQUEST: %p", req->handle);
+    if (httpd_req_get_hdr_value_str(req, "Cookie", cookie_hdr, cookie_size) != ESP_OK) {
         ESP_LOGE(TAG, "Cookie header not found");
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Cookie header not found");
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "End of the the cookie header");
+
 
     char sid[kSessionTokenLen + 1];
     if (parse_cookie(cookie_hdr, "SID", sid, sizeof(sid)).is_err()) {
