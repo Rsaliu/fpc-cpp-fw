@@ -93,6 +93,8 @@ function saveConfig() {
     document.getElementById("status").textContent = `Error saving configuration: ${error.message}`;
   });
 }
+window.loadConfig = loadConfig; // Expose loadConfig to the global scope for the inline onclick handler
+window.saveConfig = saveConfig; // Expose saveConfig to the global scope for the inline onclick handler
 
 // Initialize the UI after DOM is ready. Load tab-bar first so its
 // elements (tab links) are present before updating visibility.

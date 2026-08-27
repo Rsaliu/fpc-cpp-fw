@@ -44,6 +44,7 @@ function register(event) {
     alert("Registration failed!");
   });
 }
+window.register = register; // Expose register to the global scope for the inline onclick handler
 
 // Initialize the UI after DOM is ready. Load tab-bar first so its
 // elements (tab links) are present before updating visibility.
