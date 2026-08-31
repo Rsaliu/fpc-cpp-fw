@@ -38,13 +38,6 @@ esp_err_t set_config_handler(httpd_req_t* req)
     if (req == nullptr) { return ESP_ERR_INVALID_ARG; }
     inject_cors(req);
 
-    if (req->method == HTTP_OPTIONS) {
-        httpd_resp_set_status(req, HTTPD_200);
-        httpd_resp_send(req, nullptr, 0);
-        return ESP_OK;
-    }
-
-    [[maybe_unused]] Session* sessio = nullptr;
     if (auth_gate(req, &sessio) != ESP_OK) { 
         return ESP_FAIL; 
     }
