@@ -8,6 +8,7 @@ namespace fpc {
 static const char* kAnalyticsTag = "current_analytics";
 
 constexpr float percentage = 0.8f;
+constexpr float max_non_working_current = 0.1f;
 
 PumpStateMachineState current_analytics_capacity_decision(
     Span<const float> samples,
@@ -49,6 +50,14 @@ PumpStateMachineState current_analytics_capacity_decision(
     if (avg >= percentage_threshold) {
         ESP_LOGW(kAnalyticsTag, "Overcurrent: 80%% value=%.2f, rated=%.2f", percentage_threshold , rated_current);
         return PumpStateMachineState::Overcurrent;
+    }
+    else if (avg < min_working_current && avg > max_non_working_current) {
+        ESP_LOGW(kAnalyticsTag, "Undercurrent: avg=%.2f, min=%.2f", avg, min_working_current);
+        return PumpStateMachineState::Undercurrent;
+    }
+    else if (avg <= max_non_working_current) {
+        ESP_LOGW(kAnalyticsTag, "off: avg=%.2f, min=%.2f", avg, min_working_current);
+        return PumpStateMachineState::Off;
     }
     else{
         ESP_LOGI(kAnalyticsTag, "Normal: avg=%.2f", avg);

@@ -16,6 +16,7 @@ enum class PumpStateMachineState : uint8_t {
     Undercurrent = 1,
     Overcurrent  = 2,
     Invalid     = 3,  ///< Used to indicate an error in the rated current reading or other unexpected condition.
+    Off         = 4,  ///< Used to indicate that the pump is off and not drawing any current.
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
