@@ -114,7 +114,7 @@ void SessionManager::set_cookie(httpd_req_t* req, const Session* session)
     // must outlive the handler's httpd_resp_send call.
     static char cookie[180];
     std::snprintf(cookie, sizeof(cookie),
-                  "SID=%s; Path=/; HttpOnly; Max-Age=%d",
+                  "SID=%s; Path=/; HttpOnly; Samesite=Lax; Max-Age=%d",
                   session->token.data(),
                   static_cast<int>(kSessionLifetimeUs / 1000000));
     ESP_LOGI(TAG, "Setting session cookie: %s", cookie);
