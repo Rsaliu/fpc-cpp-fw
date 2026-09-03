@@ -62,3 +62,68 @@ menu "FPC MQTTS Configuration"
             "{device_id}" is replaced at runtime with the device MAC.
 
 endmenu
+
+menu "FPC Current Sensor / Pump Monitor Experiment"
+
+    config FPC_EXPERIMENT_MODE_ENABLE
+        bool "Enable experiment-mode firmware"
+        default n
+        help
+            When enabled, app_main() runs the profiling harness
+            (fpc::experiment::run()) instead of the normal DeviceMode
+            boot flow. See docs/experiments/current_sensor_pump_monitor_profiling.md.
+
+    if FPC_EXPERIMENT_MODE_ENABLE
+
+        config FPC_EXPERIMENT_ID
+            int "Experiment to run (1-7)"
+            range 1 7
+            default 1
+            help
+                1: current-read latency
+                2: current-read accuracy sweep
+                3: consecutive-read throughput
+                4: overcurrent detection tolerance
+                5: state-change reaction latency
+                6: relay trip latency
+                7: multi-pump scaling behavior (max pumps)
+
+        choice FPC_EXPERIMENT_SENSOR_BACKEND
+            prompt "Current sensor backend (experiments 1-2)"
+            default FPC_EXPERIMENT_BACKEND_SYNTHETIC
+            help
+                SYNTHETIC lets the harness build/run without any sensor
+                hardware attached (firmware-overhead baseline only).
+
+            config FPC_EXPERIMENT_BACKEND_INTERNAL_ADC
+                bool "Internal ADC (ACS712)"
+            config FPC_EXPERIMENT_BACKEND_ADS1115
+                bool "ADS1115 over I2C (ACS712)"
+            config FPC_EXPERIMENT_BACKEND_SYNTHETIC
+                bool "Synthetic (no hardware)"
+        endchoice
+
+        config FPC_EXPERIMENT_SAMPLE_COUNT
+            int "Sample count N (experiments 1, 3)"
+            default 1000
+
+        config FPC_EXPERIMENT_STEP_DELAY_MS
+            int "Settling delay between accuracy-sweep steps (ms, experiment 2)"
+            default 3000
+
+        config FPC_EXPERIMENT_CHECK_INTERVAL_MS
+            int "PumpMonitorTask check interval (ms, experiments 3, 7)"
+            default 100
+
+        config FPC_EXPERIMENT_PUMP_COUNT
+            int "Number of pump monitors (experiment 7, max 10)"
+            range 1 10
+            default 10
+
+        config FPC_EXPERIMENT_DURATION_S
+            int "Run duration for task-driven experiments (s, experiments 5/6/7)"
+            default 30
+
+    endif
+
+endmenu
