@@ -109,6 +109,22 @@ TEST_CASE("capacity_decision: overcurrent", "[pump_monitor]")
     TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Overcurrent, state);
 }
 
+TEST_CASE("capacity_decision: undercurrent", "[pump_monitor]")
+{
+    const float samples[] = {0.2f, 0.25f,0.3f, 0.35f, 0.4f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 5}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Undercurrent, state);
+}
+
+TEST_CASE("capacity_decision: off", "[pump_monitor]")
+{
+    const float samples[] = {0.05f, 0.08f, 0.03f, 0.02f, 0.01f};
+    auto state = fpc::current_analytics_capacity_decision(
+        fpc::Span<const float>{samples, 5}, 6.0f, 0.5f);
+    TEST_ASSERT_EQUAL(fpc::PumpStateMachineState::Off, state);
+}
+
 TEST_CASE("capacity_decision: average of 3 largest samples", "[pump_monitor]")
 {
     const float samples[] = {2.0f, 5.0f, 1.0f, 8.0f, 10.0f};
