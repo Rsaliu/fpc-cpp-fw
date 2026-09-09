@@ -1,5 +1,5 @@
 import { isLoggedIn, redirectTo } from './utils.js';
-export const API_URL = "http://fpc-webserver.local";
+export const API_URL = "";
 export function logout() {
   localStorage.removeItem("isLoggedIn");
   redirectTo("home_ui.html");
