@@ -17,15 +17,18 @@
 #include "tank_monitor_task.hpp"
 #include "wifi_hotspot.hpp"
 #include "webserver_task.hpp"
+#include "experiment.hpp"
 #include "esp_http_server.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "sdkconfig.h"
 #include <cstdio>
 #include <memory>
 #include <string>
 #include <vector>
 
+#define CONFIG_FPC_EXPERIMENT_MODE_ENABLE 1
 using namespace fpc;
 
 static const char* TAG = "APP_MAIN";
@@ -414,6 +417,13 @@ static void webserver_task_starter() {
 // ─── Entry point ──────────────────────────────────────────────────────────────
 
 extern "C" void app_main(void) {
+#if CONFIG_FPC_EXPERIMENT_MODE_ENABLE
+    // Experiment-mode firmware — see docs/experiments/current_sensor_pump_monitor_profiling.md
+    // Does not fall through to the normal DeviceMode boot flow below.
+    fpc::experiment::run();
+    return;
+#endif
+
     DeviceModeConfig dm_cfg{
         .button_pin   = GPIO_NUM_16,
         .main_task_cb = main_tasks_starter,
