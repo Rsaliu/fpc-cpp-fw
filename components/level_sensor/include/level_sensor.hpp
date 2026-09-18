@@ -90,7 +90,7 @@ struct LevelSensorConfig {
     Transport           transport{};      ///< Sends frame / receives response.
     ResponseInterpreter interpreter{};    ///< Decodes the response bytes.
     uint32_t            timeout_ms{100u}; ///< Receive timeout in milliseconds.
-    uint32_t            blindspot_mm{28}; ///< The minimium range(Blindspot) of the sensor
+    uint32_t            blindspot_mm{280}; ///< The minimium range(Blindspot) of the sensor
 
 };
 
