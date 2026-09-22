@@ -42,6 +42,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <vector>
 #include "driver/i2c_master.h"
 #include "driver/gpio.h"
 #include "esp_adc/adc_oneshot.h"
@@ -114,6 +115,41 @@ make_internal_adc_acs712_read_callback(const InternalAdcAcs712Config& cfg) noexc
 
 [[nodiscard]] Result<ReadCallback>
 make_ads1115_acs712_read_callback(const Ads1115Acs712Config& cfg) noexcept;
+
+/**
+ * @brief Owns one I2C master bus and hands out per-address device handles.
+ *
+ * Multiple ADS1115 current-sensor channels (distinguished by input_channel)
+ * share the same physical chip/address/bus, so the bus and each device must
+ * only be created once — `i2c_new_master_bus()` fails if the port is already
+ * acquired. Callers create one `Ads1115I2cBus` per physical bus and call
+ * `device_for()` for every sensor that needs a handle; the second and later
+ * calls for the same address return the cached handle.
+ */
+class Ads1115I2cBus final {
+public:
+    Ads1115I2cBus(i2c_port_num_t port, gpio_num_t sda_pin, gpio_num_t scl_pin) noexcept;
+    ~Ads1115I2cBus();
+
+    Ads1115I2cBus(const Ads1115I2cBus&)            = delete;
+    Ads1115I2cBus& operator=(const Ads1115I2cBus&) = delete;
+
+    /// Returns the device handle for `address`, creating the bus/device on first use.
+    [[nodiscard]] Result<i2c_master_dev_handle_t>
+    device_for(uint16_t address, uint32_t scl_speed_hz) noexcept;
+
+private:
+    struct AddressedDevice {
+        uint16_t                address;
+        i2c_master_dev_handle_t handle;
+    };
+
+    i2c_port_num_t                port_;
+    gpio_num_t                    sda_pin_;
+    gpio_num_t                    scl_pin_;
+    i2c_master_bus_handle_t       bus_handle_{nullptr};
+    std::vector<AddressedDevice>  devices_;
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // § 3  ICurrentSensor

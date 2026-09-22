@@ -52,6 +52,7 @@ struct Application {
     // Destroyed last — base resources
     std::vector<std::unique_ptr<EspUartDriver>> uart_drivers;
     std::vector<std::unique_ptr<Rs485>>         rs485_buses;
+    std::vector<std::unique_ptr<Ads1115I2cBus>> ads1115_buses;
     std::vector<std::unique_ptr<EspGpioDriver>> gpio_drivers;
     std::vector<std::unique_ptr<Relay>>         relays;
     std::vector<std::unique_ptr<Pump>>          pumps;
