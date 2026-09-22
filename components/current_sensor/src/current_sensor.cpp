@@ -254,6 +254,54 @@ private:
 
 } // namespace
 
+Ads1115I2cBus::Ads1115I2cBus(i2c_port_num_t port, gpio_num_t sda_pin, gpio_num_t scl_pin) noexcept
+    : port_{port}, sda_pin_{sda_pin}, scl_pin_{scl_pin}
+{}
+
+Ads1115I2cBus::~Ads1115I2cBus() {
+    for (const auto& dev : devices_) {
+        (void)i2c_master_bus_rm_device(dev.handle);
+    }
+    if (bus_handle_ != nullptr) {
+        (void)i2c_del_master_bus(bus_handle_);
+    }
+}
+
+Result<i2c_master_dev_handle_t>
+Ads1115I2cBus::device_for(uint16_t address, uint32_t scl_speed_hz) noexcept {
+    if (bus_handle_ == nullptr) {
+        i2c_master_bus_config_t bus_cfg{};
+        bus_cfg.i2c_port = port_;
+        bus_cfg.sda_io_num = sda_pin_;
+        bus_cfg.scl_io_num = scl_pin_;
+        bus_cfg.clk_source = I2C_CLK_SRC_DEFAULT;
+        bus_cfg.glitch_ignore_cnt = 0;
+        bus_cfg.flags.enable_internal_pullup = 1;
+
+        if (i2c_new_master_bus(&bus_cfg, &bus_handle_) != ESP_OK) {
+            return Result<i2c_master_dev_handle_t>::err(SystemError::OperationFailed);
+        }
+    }
+
+    for (const auto& dev : devices_) {
+        if (dev.address == address) {
+            return Result<i2c_master_dev_handle_t>::ok(dev.handle);
+        }
+    }
+
+    i2c_device_config_t dev_cfg{};
+    dev_cfg.dev_addr_length = I2C_ADDR_BIT_LEN_7;
+    dev_cfg.device_address = address;
+    dev_cfg.scl_speed_hz = scl_speed_hz;
+
+    i2c_master_dev_handle_t dev_handle{nullptr};
+    if (i2c_master_bus_add_device(bus_handle_, &dev_cfg, &dev_handle) != ESP_OK) {
+        return Result<i2c_master_dev_handle_t>::err(SystemError::OperationFailed);
+    }
+    devices_.push_back({address, dev_handle});
+    return Result<i2c_master_dev_handle_t>::ok(dev_handle);
+}
+
 CurrentSensor::CurrentSensor(CurrentSensorConfig config) noexcept
     : m_config{std::move(config)}
 {}

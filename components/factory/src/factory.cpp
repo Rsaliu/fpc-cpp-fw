@@ -107,6 +107,11 @@ Result<Application> Factory::create_from_config(
 
     // ── 4. CurrentSensors — hardware-backed read callbacks ────────────────────
     // Use hardware-backed callback builders from current_sensor component.
+    // All ADS1115_One sensors in this PCU share one I2C bus/device — creating
+    // a separate bus per sensor makes i2c_new_master_bus() fail on the 2nd+
+    // sensor since the port is already acquired.
+
+    Ads1115I2cBus* ads1115_bus = nullptr;
 
     for (const auto& cs_cfg : cfg.current_sensors) {
         if (cs_cfg.make != CurrentSensorMakeType::ACS712) {
@@ -127,7 +132,19 @@ Result<Application> Factory::create_from_config(
             cb_result = make_internal_adc_acs712_read_callback(hw_cfg);
             sensor_make = "ACS712 + InternalADC";
         } else if (cs_cfg.interface.type == CurrentSensorInterfaceType::ADS1115_One) {
+            if (ads1115_bus == nullptr) {
+                app.ads1115_buses.push_back(std::make_unique<Ads1115I2cBus>(
+                    board::kAds1115I2cPort, board::kAds1115SdaPin, board::kAds1115SclPin));
+                ads1115_bus = app.ads1115_buses.back().get();
+            }
+            auto dev_result = ads1115_bus->device_for(board::kAds1115DeviceAddress,
+                                                       board::kAds1115SclSpeedHz);
+            if (dev_result.is_err()) {
+                return Result<Application>::err(dev_result.error());
+            }
+
             Ads1115Acs712Config hw_cfg{};
+            hw_cfg.device_handle = dev_result.value();
             hw_cfg.input_channel = cs_cfg.interface.channel;
             hw_cfg.pga_mode = board::kAds1115DefaultPga;
             hw_cfg.zero_voltage_mv = 2500;
